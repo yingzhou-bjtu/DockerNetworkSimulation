@@ -1,0 +1,223 @@
+version: "2.3"
+services:
+  r1:
+    container_name: r1
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r1r2:
+          ipv4_address: 10.0.1.2
+      r1r3:
+          ipv4_address: 10.0.9.2
+      r1r4:
+          ipv4_address: 10.0.4.3 
+    restart: on-failure
+    
+  r2:
+    container_name: r2
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r1r2:
+          ipv4_address: 10.0.1.3 
+      r2r3:
+          ipv4_address: 10.0.2.2 
+      t1r2:
+          ipv4_address: 10.0.10.3
+    restart: on-failure
+    
+  r3:
+    container_name: r3
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r1r3:
+          ipv4_address: 10.0.9.3
+      r2r3:
+          ipv4_address: 10.0.2.3
+      r3r4:
+          ipv4_address: 10.0.3.2
+      r3r5:
+          ipv4_address: 10.0.25.2
+    restart: on-failure
+    
+  r4:
+    container_name: r4
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r3r4:
+          ipv4_address: 10.0.3.3 
+      r1r4:
+          ipv4_address: 10.0.4.2
+      t2r4:
+          ipv4_address: 10.0.11.2
+    restart: on-failure
+    
+  r5:
+    container_name: r5
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r5t3:
+          ipv4_address: 10.0.21.2
+      r5r4:
+          ipv4_address: 10.0.29.2
+      r5r5:
+          ipv4_address: 10.0.24.3 
+      r3r5:
+          ipv4_address: 10.0.25.3 
+    restart: on-failure
+    
+  t1:
+    container_name: t1
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      t1r2:
+          ipv4_address: 10.0.10.2 
+    restart: on-failure
+    
+  t2:
+    container_name: t2
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      t2r4:
+          ipv4_address: 10.0.11.3 
+    restart: on-failure
+    
+  t3:
+    container_name: t3
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r5t3:
+          ipv4_address: 10.0.21.3
+    restart: on-failure
+    
+  t4:
+    container_name: t4
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r5t4:
+          ipv4_address: 10.0.29.3
+    restart: on-failure
+    
+  t5:
+    container_name: t5
+    image: ospf
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "tail -f /dev/null"
+    command: ["./myapp"]
+    networks:
+      r5t5:
+          ipv4_address: 10.0.24.2 
+    restart: on-failure
+          
+networks:
+  
+  r1r2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.1.0/24
+      
+  r1r3:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.9.0/24
+      
+  r2r3:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.2.0/24
+      
+  r3r4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.3.0/24
+      
+  r1r4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.4.0/24
+      
+  t1r2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.10.0/24
+      
+  t2r4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.11.0/24
+      
+  r3r5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.25.0/24
+      
+  r5t3:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.21.0/24
+      
+  r5t4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.29.0/24
+      
+  r5t5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.24.0/24

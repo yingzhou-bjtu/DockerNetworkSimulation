@@ -1,0 +1,613 @@
+#include <pthread.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "common.h"
+#include "io.h"
+#include "lsdb.h"
+#include "recv.h"
+#include "send.h"
+#include "spf.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+
+#define TABLE_SIZE 101
+
+#define V 100  // 图的顶点数量（根据实际情况调整）
+#define MAX_QUEUE_SIZE V  // 队列的最大大小
+// 定义哈希表节点结构
+typedef struct HashNode {
+    char *key;
+    char **values;
+    int valuesSize;
+    int valuesCapacity;
+    struct HashNode *next;
+} HashNode;
+
+// 定义哈希表结构
+typedef struct HashTable {
+    HashNode *nodes[TABLE_SIZE];
+} HashTable;
+
+// 哈希函数
+unsigned int hashFunction(const char *str) {
+    unsigned int hash = 0;
+    for (int i = 0; str[i] != '\0'; i++) {
+        hash = (hash * 31 + str[i]) % TABLE_SIZE;
+    }
+    return hash;
+}
+
+// 创建哈希表
+HashTable *createHashTable() {
+    HashTable *table = (HashTable *)malloc(sizeof(HashTable));
+    if (!table) {
+        perror("Failed to create hash table");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        table->nodes[i] = NULL;
+    }
+    return table;
+}
+
+// 插入key-value对
+void insert(HashTable *table, const char *key, const char *value) {
+    if (!table) return;
+
+    unsigned int index = hashFunction(key);
+    HashNode *node = table->nodes[index];
+
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            for (int i = 0; i < node->valuesSize; i++) {
+                if (strcmp(node->values[i], value) == 0) {
+                    return;
+                }
+            }
+            node->valuesSize++;
+            node->valuesCapacity = node->valuesSize < node->valuesCapacity ? node->valuesCapacity : node->valuesSize * 2;
+            node->values = (char **)realloc(node->values, sizeof(char *) * node->valuesCapacity);
+            node->values[node->valuesSize - 1] = strdup(value);
+            return;
+        }
+        node = node->next;
+    }
+
+    node = (HashNode *)malloc(sizeof(HashNode));
+    node->key = strdup(key);
+    node->valuesSize = 1;
+    node->valuesCapacity = 1;
+    node->values = (char **)malloc(sizeof(char *));
+    node->values[0] = strdup(value);
+    node->next = table->nodes[index];
+    table->nodes[index] = node;
+}
+
+// 查找key并返回value数组
+char **search(HashTable *table, const char *key, int *size) {
+    if (!table || !key || !size) return NULL;
+
+    unsigned int index = hashFunction(key);
+    HashNode *node = table->nodes[index];
+
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            *size = node->valuesSize;
+            return node->values;
+        }
+        node = node->next;
+    }
+
+    *size = 0;
+    return NULL;
+}
+// 显示哈希表中的所有键值对
+void displayHashTable(HashTable *table) {
+    if (!table) return;
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        HashNode *node = table->nodes[i];
+        while (node) {
+            printf("K: %s, V: ", node->key);
+            for (int j = 0; j < node->valuesSize; j++) {
+                printf("%s ", node->values[j]);
+            }
+            printf("\n");
+            node = node->next;
+        }
+    }
+}
+
+// 收集所有设备
+int collectAllDevices(HashTable *table, char ***allDevices) {
+    int totalDevices = 0;
+    *allDevices = NULL;
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        HashNode *node = table->nodes[i];
+        while (node) {
+            for (int j = 0; j < node->valuesSize; j++) {
+                int found = 0;
+                for (int k = 0; k < totalDevices; k++) {
+                    if (strcmp((*allDevices)[k], node->values[j]) == 0) {
+                        found = 1;
+                        break;
+                    }
+                }
+                if (!found) {
+                    totalDevices++;
+                    *allDevices = (char **)realloc(*allDevices, totalDevices * sizeof(char *));
+                    (*allDevices)[totalDevices - 1] = strdup(node->values[j]);
+                }
+            }
+            node = node->next;
+        }
+    }
+
+    return totalDevices;
+}
+
+// 建立邻接矩阵
+void buildAdjacencyMatrix(HashTable *table, char **allDevices, int totalDevices, int **adjMatrix) {
+    for (int i = 0; i < totalDevices; i++) {
+        for (int j = 0; j < totalDevices; j++) {
+            adjMatrix[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        HashNode *node = table->nodes[i];
+        while (node) {
+            for (int j = 0; j < node->valuesSize; j++) {
+                for (int k = 0; k < totalDevices; k++) {
+                    if (strcmp(node->values[j], allDevices[k]) == 0) {
+                        for (int l = 0; l < node->valuesSize; l++) {
+                            for (int m = 0; m < totalDevices; m++) {
+                                if (strcmp(node->values[l], allDevices[m]) == 0 && k != m) {
+                                    adjMatrix[k][m] = 1;
+                                    adjMatrix[m][k] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            node = node->next;
+        }
+    }
+}
+
+typedef struct {
+    int id[V];
+    int next_hop[V];
+} BFSResult;
+
+typedef struct {
+    int data[MAX_QUEUE_SIZE];
+    int front, rear;
+} Queue;
+
+// 初始化队列
+void initQueue(Queue* q) {
+    q->front = 0;
+    q->rear = -1;
+}
+
+// 入队
+void enqueue(Queue* q, int value) {
+    if (q->rear < MAX_QUEUE_SIZE - 1) {
+        q->data[++(q->rear)] = value;
+    }
+}
+
+// 出队
+int dequeue(Queue* q) {
+    if (q->front <= q->rear) {
+        return q->data[(q->front)++];
+    }
+    return -1; // 队列为空时返回 -1
+}
+
+// 检查队列是否为空
+bool isQueueEmpty(Queue* q) {
+    return q->front > q->rear;
+}
+
+// BFS 计算函数
+BFSResult bfs(int **graph, int totalDevices, int start) {
+    BFSResult result;
+    int dist[V]; // 存储从起始节点到其他节点的距离
+    bool visited[V]; // 访问标记
+    int prev[V]; // 存储每个节点的前驱节点
+    Queue q;
+
+    initQueue(&q);
+
+    // 初始化
+    for (int i = 0; i < V; i++) {
+        dist[i] = -1; // 初始化为 -1，表示不可达
+        visited[i] = false;
+        prev[i] = -1;
+        result.next_hop[i] = -1; // 初始化下一跳为 -1
+    }
+    dist[start] = 0;
+    visited[start] = true;
+    enqueue(&q, start);
+
+    // BFS
+    while (!isQueueEmpty(&q)) {
+        int u = dequeue(&q);
+
+        for (int v = 0; v < totalDevices; v++) {
+            if (graph[u][v] == 1 && !visited[v]) {
+                visited[v] = true;
+                dist[v] = dist[u] + 1;
+                prev[v] = u;
+                enqueue(&q, v);
+            }
+        }
+    }
+
+    // 处理下一跳
+    for (int i = 0; i < totalDevices; i++) {
+        result.id[i] = i;
+
+        if (dist[i] != -1) {
+            // 从目标节点追溯到起始节点
+            int u = i;
+            while (prev[u] != start && prev[u] != -1) {
+                u = prev[u];
+            }
+            result.next_hop[i] = (prev[u] == start) ? u : -1;
+        } else {
+            result.next_hop[i] = -1;
+        }
+    }
+
+    return result;
+}
+
+/*
+// 打印邻居信息的函数
+void print_neighbors(interface *iface, const char *dest_id, const char *next_hop_id) {
+    neighbor *curr = iface->nbrs;
+    
+    while (curr != NULL) {
+    	//printf("Neighbors on the interface: \n");	
+    	char str1[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(struct in_addr){curr->router_id}, str1, INET_ADDRSTRLEN);
+	char str2[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(struct in_addr){curr->ip}, str2, INET_ADDRSTRLEN);
+    
+        //printf("Neighbors Router ID: %s, IP: %s,\n", str1, str2);
+        //printf("IPdest_id: %s, next_hop_id: %s,\n", dest_id, next_hop_id);
+               
+        // 如果找到了下一跳的 IP，添加路由表条目
+        //if (next_hop_id == str1)
+        if (strcmp(next_hop_id, str1) == 0)
+        {
+            // 构建命令：添加路由到下一跳           
+            //printf("iptable add %s via %s\n", dest_id, str2);
+            char command[256];
+            snprintf(command, sizeof(command), "ip route add %s via %s", dest_id, str2);
+            //printf("Adding route: %s\n", command);
+            
+            int sta = system(command);
+
+    				    // 检查命令执行状态
+				    if (sta == -1) {
+					printf("Error: Command execution failed.\n");
+					
+					
+				    }
+
+        }
+        curr = curr->next; // 移动到下一个邻居
+    }
+}
+*/
+
+#define MAX_COMMANDS 100
+#define COMMAND_SIZE 256
+
+// 假设的命令存储结构
+typedef struct {
+    char command[COMMAND_SIZE];
+    int executed;
+} executed_command;
+
+executed_command command_history[MAX_COMMANDS];
+int command_count = 0;
+
+// 检查命令是否已执行
+int command_already_executed(const char *command) {
+    for (int i = 0; i < command_count; i++) {
+        if (strcmp(command_history[i].command, command) == 0) {
+            return 1; // 命令已执行
+        }
+    }
+    return 0; // 命令未执行
+}
+
+// 添加命令到历史记录
+void add_command_to_history(const char *command) {
+    if (command_count < MAX_COMMANDS) {
+        strcpy(command_history[command_count].command, command);
+        command_history[command_count].executed = 1;
+        command_count++;
+    }
+}
+
+// 执行命令，如果它尚未执行
+void execute_command_if_not_already(const char *command) {
+    if (!command_already_executed(command)) {
+        int sta = system(command);
+        if (sta == -1) {
+            printf("Error: Command execution failed.\n");
+        } else {
+            add_command_to_history(command); // 命令执行成功，添加到历史记录
+        }
+    }
+}
+
+/*/ 打印邻居信息的函数
+void print_neighbors(interface *iface, const char *dest_id, const char *next_hop_id, HashTable *table) {
+    neighbor *curr = iface->nbrs;
+    
+    if (!table) return;    
+    
+    while (curr != NULL) {
+        char str1[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(struct in_addr){curr->router_id}, str1, INET_ADDRSTRLEN);
+        char str2[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(struct in_addr){curr->ip}, str2, INET_ADDRSTRLEN);
+        
+        if (strcmp(next_hop_id, str1) == 0) {
+            char command[256];
+            snprintf(command, sizeof(command), "ip route add %s via %s", dest_id, str2);
+            printf("routing:%s\n", command);
+            execute_command_if_not_already(command);
+            
+            
+            
+            for (int i = 0; i < TABLE_SIZE; i++) {
+		HashNode *node = table->nodes[i];
+		
+		if (strcmp(next_hop_id, dest_id) == 0)
+		{
+		    printf("K: %s, V: ", node->key);
+		    for (int j = 0; j < node->valuesSize; j++) {
+		        printf("%s ", node->values[j]);
+		    }
+		    printf("\n");
+		}
+		node = node->next;
+		
+	    }
+	    
+	    
+	    
+	    
+        }
+        curr = curr->next;
+    }
+}
+*/
+void print_neighbors(interface *iface, const char *dest_id, const char *next_hop_id, HashTable *table) {
+    neighbor *curr = iface->nbrs;
+    
+    if (!table) return;    
+    
+    while (curr != NULL) {
+        char str1[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(struct in_addr){curr->router_id}, str1, INET_ADDRSTRLEN);
+        char str2[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(struct in_addr){curr->ip}, str2, INET_ADDRSTRLEN);
+        
+        if (strcmp(next_hop_id, str1) == 0) {
+            char command[256];
+            snprintf(command, sizeof(command), "ip route add %s via %s", dest_id, str2);
+            printf("routing:%s\n", command);
+            execute_command_if_not_already(command);
+            
+            // 遍历哈希表查找并打印匹配的节点
+            for (int i = 0; i < TABLE_SIZE; i++) {
+                HashNode *node = table->nodes[i];
+                while (node) {
+                    if (strcmp(node->key, dest_id) == 0) {
+                        //printf("K: %s, V: ", node->key);
+                        for (int j = 0; j < node->valuesSize; j++) {
+                            //printf("%s ", node->values[j]);
+                            
+                            char command1[256];
+			    snprintf(command1, sizeof(command1), "ip route add %s/24 via %s", node->values[j], str2);
+			    printf("Net routing:%s\n", command1);
+			    execute_command_if_not_already(command1);
+            
+                        }
+                        //printf("\n");
+                    }
+                    node = node->next;
+                }
+            }
+        }
+        curr = curr->next;
+    }
+}
+
+
+
+int main() {
+	//printf("123\n");
+	int area_id;
+	int on = 1;
+	int start_node;
+	pthread_t t_recv, t_send;
+	all_spf_routers = inet_addr("224.0.0.5");
+	all_d_routers = inet_addr("224.0.0.6");
+	if_init();
+	printf("%d interfaces is on.\n", num_if);
+	for (int i = 0; i < num_if; ++i) {
+		printf("%d: %s\n", i, ifs[i].name);
+		puts("set area id for this interface: 0");
+		//scanf("%u", &area_id);
+		area_id = 0;
+		areas[area_id].ifs[areas[area_id].num_if++] = ifs + i;
+		ifs[i].a = areas + area_id;
+		ifs[i].area_id = htonl(area_id);
+		ifs[i].state = 0;
+		ifs[i].hello_interval = 10;
+		ifs[i].dead_interval = 40;
+		ifs[i].rxmt_interval = 5;
+		ifs[i].hello_timer = 0;
+		ifs[i].wait_timer = 0;
+		ifs[i].cost = htons(5);
+		ifs[i].inf_trans_delay = 1;
+		ifs[i].num_nbr = 0;
+		ifs[i].nbrs = NULL;
+	}
+	/* use an ip address as my router id */
+	myid = ifs[0].ip;
+	int time_i = 10;
+	char myid_str[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(struct in_addr){myid}, myid_str, INET_ADDRSTRLEN);
+
+	pthread_create(&t_recv, NULL, recv_loop, &on);
+	pthread_create(&t_send, NULL, send_loop, &on);
+	/* update the route table */
+	for (;;) {
+	
+	HashTable *table = createHashTable();
+	HashTable *table1 = createHashTable();
+	
+		for (int i = 0; i < num_if; ++i) {
+			rt_lsa = gen_router_lsa(ifs[i].a);
+			
+			
+			for (int j = 0; j < ifs[i].a->num_lsa; ++j) {
+				char id_str[INET_ADDRSTRLEN];
+				char ad_router_str[INET_ADDRSTRLEN];
+				
+				// 将 IP 地址格式化为字符串
+				inet_ntop(AF_INET, &(struct in_addr){ifs[i].a->lsas[j]->id}, id_str, INET_ADDRSTRLEN);
+				inet_ntop(AF_INET, &(struct in_addr){ifs[i].a->lsas[j]->ad_router}, ad_router_str, INET_ADDRSTRLEN);
+				
+				// 打印 LSA 头部信息
+				//printf("LSA #%d:\n", j);
+				// printf("  LSA Type: %d\n", ifs[i].a->lsas[j]->type);
+				//printf("  LSA ID: %s\n", id_str);
+				// printf("  Advertising Router: %s\n", ad_router_str);
+				
+				
+				// 检查LSA类型是否为路由器LSA
+				if (ifs[i].a->lsas[j]->type == OSPF_ROUTER_LSA) {
+				    // 转换为router_lsa指针
+				    router_lsa *rlsa = (router_lsa *)((uint8_t *)ifs[i].a->lsas[j] + sizeof(lsa_header));
+				    
+				    // 打印router_lsa的特.2定字段
+				    // printf("  Flags: 0x%02X\n", rlsa->flags);
+				    // printf("  Zero: 0x%02X\n", rlsa->zero);
+				    //printf("  Number of Links: %d\n", rlsa->num_link);
+				    
+				    char link_id_str[INET_ADDRSTRLEN];
+				    char link_data_str[INET_ADDRSTRLEN];
+				    // 打印每个link的信息
+				    for (int k = 0; k < rlsa->num_link; ++k) {
+				        struct link *link = &rlsa->links[k];			        
+				        
+				        // 将链接的ID和Data IP 地址格式化为字符串
+				        inet_ntop(AF_INET, &(struct in_addr){link->id}, link_id_str, INET_ADDRSTRLEN);
+				        inet_ntop(AF_INET, &(struct in_addr){link->data}, link_data_str, INET_ADDRSTRLEN);
+				        
+				        //printf("    Link #%d:\n", k);
+				        // printf("      Type: 0x%02X\n", link->type);
+				        //printf("      Network: %s\n", link_id_str);
+				        // printf("      Data: %s\n", link_data_str);
+				        // printf("      TOS: 0x%02X\n", link->tos);
+				        // printf("      Metric: %d\n", ntohs(link->metric));
+				        
+				        
+				        insert(table, link_id_str, id_str);
+				        insert(table1, id_str, link_id_str);
+				        
+				        
+				    }
+				    
+				    
+				    
+				}
+				// 其他LSA类型的处理可以在这里继续添加
+			    }
+			    
+			     
+			    
+			    // freeHashTable(table);
+
+			if (ifs[i].a->num_lsa > 1)
+				{
+				//time_i = 10;
+				    char **allDevices;
+				    int totalDevices = collectAllDevices(table, &allDevices);
+
+				    int **adjMatrix = (int **)malloc(totalDevices * sizeof(int *));
+				    for (int j = 0; j < totalDevices; j++) {
+					adjMatrix[j] = (int *)malloc(totalDevices * sizeof(int));
+				    }
+
+				    buildAdjacencyMatrix(table, allDevices, totalDevices, adjMatrix);
+				    
+				    start_node = 0;
+				    for (int j = 0; j < totalDevices; j++) {
+				    	if (strcmp(myid_str, allDevices[j]) == 0)
+				    		{start_node = j;}
+				    }
+				    
+				    BFSResult result = bfs(adjMatrix, totalDevices, start_node);
+				    
+
+
+				    //displayHashTable(table);
+				    // 打印下一跳
+				    printf("From (%d) %s to others：\n", start_node, allDevices[start_node]);
+				    for (int j = 0; j < totalDevices; j++) {
+				        if (result.next_hop[j] == -1) {
+				        printf("  to (%d) %s is over!\n", result.id[j], allDevices[result.id[j]]);
+				        } else {
+				        printf("  to (%d) %s next: (%d) %s\n", j, allDevices[j], result.next_hop[j], allDevices[result.next_hop[j]]);
+	
+				        print_neighbors(&ifs[i], allDevices[j], allDevices[result.next_hop[j]], table1);
+				        }
+				    }
+			
+				    /*
+				    printf("======================routing table=========================\n");
+				    int status = system("ip route show");
+
+    				    // 检查命令执行状态
+				    if (status == -1) {
+					printf("Error: Command execution failed.\n");
+					return 1;
+				    }
+
+    				    //printf("Command executed successfully.\n");
+    				    printf("============================================================\n");
+    				    */
+    				    
+				    
+
+				}
+			
+			
+			
+		}
+		sleep(10);
+	}
+	pthread_join(t_recv, NULL);
+	pthread_join(t_send, NULL);
+	return 0;
+}

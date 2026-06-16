@@ -1,0 +1,158 @@
+version: "2.3"
+services:
+  msmr:
+    container_name: oor-msmr
+    image: openoverlayrouter/oor:testing
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.conf.default.rp_filter=0
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "ip r del default && ip r add default via 10.0.0.3 && /tmp/start_testing.sh"
+    networks:
+      ms_r1:
+          ipv4_address: 10.0.0.2
+    volumes:
+      - type: bind
+        source: "./oor.msmr.conf"
+        target: "/oor/oor.conf"
+    restart: on-failure
+
+  xtr1:
+    container_name: oor-xtr1
+    image: openoverlayrouter/oor:testing
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.conf.default.rp_filter=0
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "ip r del default && ip r add default via 10.0.1.3 && /tmp/start_testing.sh"
+    networks:
+      xtr1_r1:
+          ipv4_address: 10.0.1.2
+      u1_xtr1:
+          ipv4_address: 192.168.1.2
+    volumes:
+      - type: bind
+        source: "./oor.xtr1.conf"
+        target: "/oor/oor.conf"
+    restart: on-failure
+
+  xtr2:
+    container_name: oor-xtr2
+    image: openoverlayrouter/oor:testing
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.conf.default.rp_filter=0
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv6.conf.all.disable_ipv6=0  
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    command: /bin/bash -c "ip r del default && ip r add default via 10.0.2.3 && /tmp/start_testing.sh"
+    networks:
+      xtr2_r1:
+          ipv4_address: 10.0.2.2
+      u2_xtr2: 
+          ipv4_address: 192.168.2.2
+    volumes:
+      - type: bind
+        source: "./oor.xtr2.conf"
+        target: "/oor/oor.conf"
+    restart: on-failure
+
+  r1:
+    container_name: r1
+    image: myubuntu:latest
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.conf.default.rp_filter=0
+      - net.ipv4.conf.all.rp_filter=0
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    command: tail -f /dev/null
+    networks:
+      ms_r1:
+          ipv4_address: 10.0.0.3
+      xtr1_r1: 
+          ipv4_address: 10.0.1.3
+      xtr2_r1: 
+          ipv4_address: 10.0.2.3
+    restart: on-failure
+
+  client1:
+    container_name: client1
+    image: myubuntu:latest
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW    
+    command: /bin/bash -c "ip r del default && ip r add default via 192.168.1.2 && tail -f /dev/null"
+    networks:
+      u1_xtr1:
+          ipv4_address: 192.168.1.3
+
+  client2:
+    container_name: client2
+    image: myubuntu:latest
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command: /bin/bash -c "ip r del default && ip r add default via 192.168.2.2 && tail -f /dev/null"
+    networks:
+      u2_xtr2:
+          ipv4_address: 192.168.2.3
+          
+
+networks:
+  ms_r1:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.0.0/24
+
+  xtr1_r1:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.1.0/24
+
+  xtr2_r1:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.0.2.0/24
+
+  u1_xtr1:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.1.0/24
+
+  u2_xtr2:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 192.168.2.0/24

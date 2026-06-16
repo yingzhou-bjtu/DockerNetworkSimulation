@@ -1,0 +1,22 @@
+[flask]
+host = "0.0.0.0"
+port = 5000
+debug = false
+
+[rabbitmq]
+host = "localhost"
+
+[rabbitmq.exchange]
+name = "bjtu-vire-exchange"
+type = "direct"
+
+[rabbitmq.queues]
+inbound = "vire-bjtu-queue"
+outbound = "bjtu-vire-queue"
+
+[rabbitmq.routing]
+key = ""
+
+[app]
+# 可以配置 "flask", "rabbitmq" 来选择启动哪个API
+api_type = ["flask", "rabbitmq"]

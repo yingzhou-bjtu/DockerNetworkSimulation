@@ -1,0 +1,1200 @@
+{
+    "topo": [
+        {
+            "name": "hai3lun2",
+            "topo": [
+                "nan2cha4",
+                "ha1er3bin1",
+                "yi1lan2",
+                "tu2li3he2"
+            ]
+        },
+        {
+            "name": "nan2ning2",
+            "topo": [
+                "xin1cheng2",
+                "tie3shan1gang3",
+                "bai3se4"
+            ]
+        },
+        {
+            "name": "shang4hai3",
+            "topo": [
+                "gu1su1",
+                "hang2zhou1",
+                "nan2jing1"
+            ]
+        },
+        {
+            "name": "yun2he2",
+            "topo": [
+                "fu2zhou1",
+                "hang2zhou1"
+            ]
+        },
+        {
+            "name": "hang2zhou1",
+            "topo": [
+                "shang4hai3",
+                "yun2he2",
+                "gu1su1"
+            ]
+        },
+        {
+            "name": "xi1feng1",
+            "topo": [
+                "chang2chun1",
+                "shen3yang2",
+                "jiang1yuan2",
+                "tu1quan2"
+            ]
+        },
+        {
+            "name": "lan2zhou1",
+            "topo": [
+                "ding4xi1",
+                "xi1ning2",
+                "ling2wu3",
+                "yin2chuan1"
+            ]
+        },
+        {
+            "name": "hua4zhou1",
+            "topo": [
+                "tie3shan1gang3",
+                "guang3zhou1",
+                "shen1zhen4"
+            ]
+        },
+        {
+            "name": "hu1he2hao4te4",
+            "topo": [
+                "tai4yuan2",
+                "xu2shui3"
+            ]
+        },
+        {
+            "name": "luo4zha1",
+            "topo": [
+                "la1sa4",
+                "lin2zhou1"
+            ]
+        },
+        {
+            "name": "zhan1yi4",
+            "topo": [
+                "kun1ming2",
+                "gui4yang2",
+                "zhao1jue2"
+            ]
+        },
+        {
+            "name": "xu2shui3",
+            "topo": [
+                "hu1he2hao4te4",
+                "wu2ji2",
+                "bei3jing1",
+                "hai3dian4",
+                "shi2jia1zhuang1"
+            ]
+        },
+        {
+            "name": "mi2le4",
+            "topo": [
+                "kun1ming2"
+            ]
+        },
+        {
+            "name": "qin4xian4",
+            "topo": [
+                "tai4yuan2",
+                "shi2jia1zhuang1",
+                "xi1gong1"
+            ]
+        },
+        {
+            "name": "li3ling2",
+            "topo": [
+                "chang2sha1",
+                "hong2hu2"
+            ]
+        },
+        {
+            "name": "xin1bei3",
+            "topo": [
+                "fu2zhou1"
+            ]
+        },
+        {
+            "name": "cheng2du1",
+            "topo": [
+                "qing1bai2jiang1",
+                "fu2cheng2",
+                "chong2qing4",
+                "yong3shan4"
+            ]
+        },
+        {
+            "name": "zheng4zhou1",
+            "topo": [
+                "xi1gong1"
+            ]
+        },
+        {
+            "name": "hai3dian4",
+            "topo": [
+                "bei3jing1",
+                "xu2shui3",
+                "tian1jin1"
+            ]
+        },
+        {
+            "name": "tuo1ke4xun4",
+            "topo": [
+                "wu1lu3mu4qi2",
+                "bei3tun2",
+                "xi1ning2"
+            ]
+        },
+        {
+            "name": "nan2cha4",
+            "topo": [
+                "hai3lun2",
+                "yi1lan2",
+                "dong1ning2"
+            ]
+        },
+        {
+            "name": "qing1dao3",
+            "topo": [
+                "gao1mi4",
+                "qi1xia2",
+                "yi2yuan2"
+            ]
+        },
+        {
+            "name": "bai3se4",
+            "topo": [
+                "xin1cheng2",
+                "nan2ning2",
+                "gui4yang2"
+            ]
+        },
+        {
+            "name": "hai3kou3",
+            "topo": [
+                "tie3shan1gang3",
+                "san1ya4"
+            ]
+        },
+        {
+            "name": "zha2da2",
+            "topo": [
+                "a1li3",
+                "la1sa4"
+            ]
+        },
+        {
+            "name": "da4lian2",
+            "topo": [
+                "qi1xia2",
+                "zhen4xing1"
+            ]
+        },
+        {
+            "name": "shen3yang2",
+            "topo": [
+                "xi1feng1",
+                "ping2shan1"
+            ]
+        },
+        {
+            "name": "he2fei2",
+            "topo": [
+                "quan2jiao1",
+                "nan2jing1",
+                "yi2yuan2"
+            ]
+        },
+        {
+            "name": "gui4yang2",
+            "topo": [
+                "bai3se4",
+                "zhan1yi4",
+                "chong2qing4"
+            ]
+        },
+        {
+            "name": "ling2wu3",
+            "topo": [
+                "yin2chuan1",
+                "lan2zhou1",
+                "ding4xi1"
+            ]
+        },
+        {
+            "name": "tai4yuan2",
+            "topo": [
+                "hu1he2hao4te4",
+                "qin4xian4",
+                "shi2jia1zhuang1",
+                "wu2ji2"
+            ]
+        },
+        {
+            "name": "lin2zhou1",
+            "topo": [
+                "la1sa4",
+                "luo4zha1",
+                "de2rong2",
+                "a1li3"
+            ]
+        },
+        {
+            "name": "zhao1hua4",
+            "topo": [
+                "fu2cheng2"
+            ]
+        },
+        {
+            "name": "hong2hu2",
+            "topo": [
+                "li3ling2",
+                "chang2sha1",
+                "deng4zhou1"
+            ]
+        },
+        {
+            "name": "xi1gong1",
+            "topo": [
+                "zheng4zhou1",
+                "deng4zhou1",
+                "qin4xian4",
+                "wei4yang1"
+            ]
+        },
+        {
+            "name": "chang2sha1",
+            "topo": [
+                "li3ling2",
+                "hong2hu2",
+                "gui4lin2"
+            ]
+        },
+        {
+            "name": "guang3zhou1",
+            "topo": [
+                "shen1zhen4",
+                "hua4zhou1",
+                "gui4lin2"
+            ]
+        },
+        {
+            "name": "qing1bai2jiang1",
+            "topo": [
+                "cheng2du1",
+                "fu2cheng2",
+                "chong2qing4"
+            ]
+        },
+        {
+            "name": "gao1mi4",
+            "topo": [
+                "qing1dao3",
+                "qi1xia2",
+                "yi2yuan2"
+            ]
+        },
+        {
+            "name": "kun1ming2",
+            "topo": [
+                "zhan1yi4",
+                "mi2le4"
+            ]
+        },
+        {
+            "name": "wu2ji2",
+            "topo": [
+                "shi2jia1zhuang1",
+                "xu2shui3",
+                "tai4yuan2"
+            ]
+        },
+        {
+            "name": "bei3jing1",
+            "topo": [
+                "hai3dian4",
+                "xu2shui3",
+                "tian1jin1"
+            ]
+        },
+        {
+            "name": "san1ya4",
+            "topo": [
+                "hai3kou3",
+                "tie3shan1gang3"
+            ]
+        },
+        {
+            "name": "deng4zhou1",
+            "topo": [
+                "hong2hu2",
+                "xi1gong1",
+                "wei4yang1"
+            ]
+        },
+        {
+            "name": "tu2li3he2",
+            "topo": [
+                "hai3lun2",
+                "tu1quan2",
+                "ha1er3bin1"
+            ]
+        },
+        {
+            "name": "fu2zhou1",
+            "topo": [
+                "yun2he2",
+                "xin1bei3",
+                "xia4men2"
+            ]
+        },
+        {
+            "name": "xin1cheng2",
+            "topo": [
+                "nan2ning2",
+                "bai3se4",
+                "gui4lin2"
+            ]
+        },
+        {
+            "name": "yi2yuan2",
+            "topo": [
+                "gao1mi4",
+                "qing1dao3",
+                "qi1xia2",
+                "tian1jin1",
+                "he2fei2"
+            ]
+        },
+        {
+            "name": "tie3shan1gang3",
+            "topo": [
+                "nan2ning2",
+                "hua4zhou1",
+                "hai3kou3",
+                "san1ya4"
+            ]
+        },
+        {
+            "name": "dong1ning2",
+            "topo": [
+                "yi1lan2",
+                "nan2cha4",
+                "ha1er3bin1"
+            ]
+        },
+        {
+            "name": "fu2cheng2",
+            "topo": [
+                "cheng2du1",
+                "zhao1hua4",
+                "qing1bai2jiang1"
+            ]
+        },
+        {
+            "name": "jiang1yuan2",
+            "topo": [
+                "xi1feng1",
+                "chang2chun1"
+            ]
+        },
+        {
+            "name": "bei3tun2",
+            "topo": [
+                "tuo1ke4xun4",
+                "wu1lu3mu4qi2"
+            ]
+        },
+        {
+            "name": "xi1ning2",
+            "topo": [
+                "lan2zhou1",
+                "tuo1ke4xun4",
+                "ding4xi1"
+            ]
+        },
+        {
+            "name": "shen1zhen4",
+            "topo": [
+                "guang3zhou1",
+                "hua4zhou1",
+                "xia4men2"
+            ]
+        },
+        {
+            "name": "wu1lu3mu4qi2",
+            "topo": [
+                "tuo1ke4xun4",
+                "bei3tun2",
+                "a1li3"
+            ]
+        },
+        {
+            "name": "tian1jin1",
+            "topo": [
+                "hai3dian4",
+                "bei3jing1",
+                "yi2yuan2"
+            ]
+        },
+        {
+            "name": "gu1su1",
+            "topo": [
+                "shang4hai3",
+                "hang2zhou1"
+            ]
+        },
+        {
+            "name": "ding4xi1",
+            "topo": [
+                "lan2zhou1",
+                "ling2wu3",
+                "xi1ning2"
+            ]
+        },
+        {
+            "name": "gui4lin2",
+            "topo": [
+                "chang2sha1",
+                "guang3zhou1",
+                "xin1cheng2"
+            ]
+        },
+        {
+            "name": "chong2qing4",
+            "topo": [
+                "gui4yang2",
+                "cheng2du1",
+                "qing1bai2jiang1"
+            ]
+        },
+        {
+            "name": "yi1lan2",
+            "topo": [
+                "hai3lun2",
+                "nan2cha4",
+                "dong1ning2",
+                "ha1er3bin1"
+            ]
+        },
+        {
+            "name": "xia4men2",
+            "topo": [
+                "fu2zhou1",
+                "shen1zhen4"
+            ]
+        },
+        {
+            "name": "quan2jiao1",
+            "topo": [
+                "nan2jing1",
+                "he2fei2",
+                "yu3shan1"
+            ]
+        },
+        {
+            "name": "de2rong2",
+            "topo": [
+                "lin2zhou1",
+                "zhao1jue2",
+                "yong3shan4"
+            ]
+        },
+        {
+            "name": "yin2chuan1",
+            "topo": [
+                "ling2wu3",
+                "lan2zhou1"
+            ]
+        },
+        {
+            "name": "a1li3",
+            "topo": [
+                "zha2da2",
+                "wu1lu3mu4qi2",
+                "lin2zhou1"
+            ]
+        },
+        {
+            "name": "qi1xia2",
+            "topo": [
+                "qing1dao3",
+                "da4lian2",
+                "gao1mi4",
+                "yi2yuan2"
+            ]
+        },
+        {
+            "name": "nan2jing1",
+            "topo": [
+                "quan2jiao1",
+                "shang4hai3",
+                "yu3shan1",
+                "he2fei2"
+            ]
+        },
+        {
+            "name": "ping2shan1",
+            "topo": [
+                "shen3yang2",
+                "zhen4xing1"
+            ]
+        },
+        {
+            "name": "wei4yang1",
+            "topo": [
+                "xi1gong1",
+                "deng4zhou1"
+            ]
+        },
+        {
+            "name": "zhen4xing1",
+            "topo": [
+                "ping2shan1",
+                "da4lian2"
+            ]
+        },
+        {
+            "name": "yu3shan1",
+            "topo": [
+                "quan2jiao1",
+                "nan2jing1"
+            ]
+        },
+        {
+            "name": "zhao1jue2",
+            "topo": [
+                "de2rong2",
+                "yong3shan4",
+                "zhan1yi4"
+            ]
+        },
+        {
+            "name": "chang2chun1",
+            "topo": [
+                "xi1feng1",
+                "jiang1yuan2",
+                "tu1quan2",
+                "ha1er3bin1"
+            ]
+        },
+        {
+            "name": "tu1quan2",
+            "topo": [
+                "tu2li3he2",
+                "chang2chun1",
+                "xi1feng1",
+                "ha1er3bin1"
+            ]
+        },
+        {
+            "name": "la1sa4",
+            "topo": [
+                "lin2zhou1",
+                "luo4zha1",
+                "zha2da2"
+            ]
+        },
+        {
+            "name": "ha1er3bin1",
+            "topo": [
+                "hai3lun2",
+                "tu2li3he2",
+                "dong1ning2",
+                "yi1lan2",
+                "tu1quan2",
+                "chang2chun1"
+            ]
+        },
+        {
+            "name": "yong3shan4",
+            "topo": [
+                "de2rong2",
+                "zhao1jue2",
+                "cheng2du1"
+            ]
+        },
+        {
+            "name": "shi2jia1zhuang1",
+            "topo": [
+                "wu2ji2",
+                "qin4xian4",
+                "tai4yuan2",
+                "xu2shui3"
+            ]
+        }
+    ],
+    "node_info": [
+        {
+            "name": "hai3lun2",
+            "type": "Router",
+            "latitude": 47.450661,
+            "longitude": 126.930191,
+            "altitude": 0
+        },
+        {
+            "name": "nan2ning2",
+            "type": "Router",
+            "latitude": 22.8177,
+            "longitude": 108.366407,
+            "altitude": 0
+        },
+        {
+            "name": "shang4hai3",
+            "type": "Router",
+            "latitude": 31.230525,
+            "longitude": 121.473667,
+            "altitude": 0
+        },
+        {
+            "name": "yun2he2",
+            "type": "Router",
+            "latitude": 28.116024,
+            "longitude": 119.573454,
+            "altitude": 0
+        },
+        {
+            "name": "hang2zhou1",
+            "type": "Router",
+            "latitude": 30.246026,
+            "longitude": 120.210792,
+            "altitude": 0
+        },
+        {
+            "name": "xi1feng1",
+            "type": "Router",
+            "latitude": 42.738178,
+            "longitude": 124.727491,
+            "altitude": 0
+        },
+        {
+            "name": "lan2zhou1",
+            "type": "Router",
+            "latitude": 36.060798,
+            "longitude": 103.834228,
+            "altitude": 0
+        },
+        {
+            "name": "hua4zhou1",
+            "type": "Router",
+            "latitude": 21.664483,
+            "longitude": 110.639581,
+            "altitude": 0
+        },
+        {
+            "name": "hu1he2hao4te4",
+            "type": "Router",
+            "latitude": 40.842127,
+            "longitude": 111.748814,
+            "altitude": 0
+        },
+        {
+            "name": "luo4zha1",
+            "type": "Router",
+            "latitude": 28.385811,
+            "longitude": 90.859971,
+            "altitude": 0
+        },
+        {
+            "name": "zhan1yi4",
+            "type": "Router",
+            "latitude": 25.600424,
+            "longitude": 103.822104,
+            "altitude": 0
+        },
+        {
+            "name": "xu2shui3",
+            "type": "Router",
+            "latitude": 39.018781,
+            "longitude": 115.655772,
+            "altitude": 0
+        },
+        {
+            "name": "mi2le4",
+            "type": "Router",
+            "latitude": 24.411774,
+            "longitude": 103.414817,
+            "altitude": 0
+        },
+        {
+            "name": "qin4xian4",
+            "type": "Router",
+            "latitude": 36.756152,
+            "longitude": 112.699176,
+            "altitude": 0
+        },
+        {
+            "name": "li3ling2",
+            "type": "Router",
+            "latitude": 27.6457,
+            "longitude": 113.497119,
+            "altitude": 0
+        },
+        {
+            "name": "xin1bei3",
+            "type": "Router",
+            "latitude": 25.03913908,
+            "longitude": 121.4547026,
+            "altitude": 0
+        },
+        {
+            "name": "cheng2du1",
+            "type": "Router",
+            "latitude": 30.572961,
+            "longitude": 104.066301,
+            "altitude": 0
+        },
+        {
+            "name": "zheng4zhou1",
+            "type": "Router",
+            "latitude": 34.746303,
+            "longitude": 113.625351,
+            "altitude": 0
+        },
+        {
+            "name": "hai3dian4",
+            "type": "Router",
+            "latitude": 39.959893,
+            "longitude": 116.2977,
+            "altitude": 0
+        },
+        {
+            "name": "tuo1ke4xun4",
+            "type": "Router",
+            "latitude": 42.802585,
+            "longitude": 88.643739,
+            "altitude": 0
+        },
+        {
+            "name": "nan2cha4",
+            "type": "Router",
+            "latitude": 47.139009,
+            "longitude": 129.283584,
+            "altitude": 0
+        },
+        {
+            "name": "qing1dao3",
+            "type": "Router",
+            "latitude": 36.066938,
+            "longitude": 120.382665,
+            "altitude": 0
+        },
+        {
+            "name": "bai3se4",
+            "type": "Router",
+            "latitude": 23.90307,
+            "longitude": 106.61869,
+            "altitude": 0
+        },
+        {
+            "name": "hai3kou3",
+            "type": "Router",
+            "latitude": 20.045805,
+            "longitude": 110.198418,
+            "altitude": 0
+        },
+        {
+            "name": "zha2da2",
+            "type": "Router",
+            "latitude": 31.479882,
+            "longitude": 79.807096,
+            "altitude": 0
+        },
+        {
+            "name": "da4lian2",
+            "type": "Router",
+            "latitude": 38.913962,
+            "longitude": 121.614786,
+            "altitude": 0
+        },
+        {
+            "name": "shen3yang2",
+            "type": "Router",
+            "latitude": 41.677576,
+            "longitude": 123.464675,
+            "altitude": 0
+        },
+        {
+            "name": "he2fei2",
+            "type": "Router",
+            "latitude": 31.820567,
+            "longitude": 117.227267,
+            "altitude": 0
+        },
+        {
+            "name": "gui4yang2",
+            "type": "Router",
+            "latitude": 26.646694,
+            "longitude": 106.628201,
+            "altitude": 0
+        },
+        {
+            "name": "ling2wu3",
+            "type": "Router",
+            "latitude": 38.102456,
+            "longitude": 106.339978,
+            "altitude": 0
+        },
+        {
+            "name": "tai4yuan2",
+            "type": "Router",
+            "latitude": 37.870451,
+            "longitude": 112.549656,
+            "altitude": 0
+        },
+        {
+            "name": "lin2zhou1",
+            "type": "Router",
+            "latitude": 29.893545,
+            "longitude": 91.265287,
+            "altitude": 0
+        },
+        {
+            "name": "zhao1hua4",
+            "type": "Router",
+            "latitude": 32.333173,
+            "longitude": 105.957612,
+            "altitude": 0
+        },
+        {
+            "name": "hong2hu2",
+            "type": "Router",
+            "latitude": 29.827256,
+            "longitude": 113.475984,
+            "altitude": 0
+        },
+        {
+            "name": "xi1gong1",
+            "type": "Router",
+            "latitude": 34.659959,
+            "longitude": 112.428183,
+            "altitude": 0
+        },
+        {
+            "name": "chang2sha1",
+            "type": "Router",
+            "latitude": 28.228304,
+            "longitude": 112.938882,
+            "altitude": 0
+        },
+        {
+            "name": "guang3zhou1",
+            "type": "Router",
+            "latitude": 23.130061,
+            "longitude": 113.264499,
+            "altitude": 0
+        },
+        {
+            "name": "qing1bai2jiang1",
+            "type": "Router",
+            "latitude": 30.8786,
+            "longitude": 104.251342,
+            "altitude": 0
+        },
+        {
+            "name": "gao1mi4",
+            "type": "Router",
+            "latitude": 36.382973,
+            "longitude": 119.755271,
+            "altitude": 0
+        },
+        {
+            "name": "kun1ming2",
+            "type": "Router",
+            "latitude": 24.88149,
+            "longitude": 102.833669,
+            "altitude": 0
+        },
+        {
+            "name": "wu2ji2",
+            "type": "Router",
+            "latitude": 38.178852,
+            "longitude": 114.976256,
+            "altitude": 0
+        },
+        {
+            "name": "bei3jing1",
+            "type": "Router",
+            "latitude": 39.904179,
+            "longitude": 116.407387,
+            "altitude": 0
+        },
+        {
+            "name": "san1ya4",
+            "type": "Router",
+            "latitude": 18.252865,
+            "longitude": 109.511709,
+            "altitude": 0
+        },
+        {
+            "name": "deng4zhou1",
+            "type": "Router",
+            "latitude": 32.687732,
+            "longitude": 112.08745,
+            "altitude": 0
+        },
+        {
+            "name": "tu2li3he2",
+            "type": "Router",
+            "latitude": 50.472191,
+            "longitude": 120.985608,
+            "altitude": 0
+        },
+        {
+            "name": "fu2zhou1",
+            "type": "Router",
+            "latitude": 26.074286,
+            "longitude": 119.296411,
+            "altitude": 0
+        },
+        {
+            "name": "xin1cheng2",
+            "type": "Router",
+            "latitude": 24.066176,
+            "longitude": 108.665641,
+            "altitude": 0
+        },
+        {
+            "name": "yi2yuan2",
+            "type": "Router",
+            "latitude": 36.185402,
+            "longitude": 118.170856,
+            "altitude": 0
+        },
+        {
+            "name": "tie3shan1gang3",
+            "type": "Router",
+            "latitude": 21.529878,
+            "longitude": 109.422099,
+            "altitude": 0
+        },
+        {
+            "name": "dong1ning2",
+            "type": "Router",
+            "latitude": 44.090361,
+            "longitude": 131.124839,
+            "altitude": 0
+        },
+        {
+            "name": "fu2cheng2",
+            "type": "Router",
+            "latitude": 31.455192,
+            "longitude": 104.756917,
+            "altitude": 0
+        },
+        {
+            "name": "jiang1yuan2",
+            "type": "Router",
+            "latitude": 42.056747,
+            "longitude": 126.591178,
+            "altitude": 0
+        },
+        {
+            "name": "bei3tun2",
+            "type": "Router",
+            "latitude": 47.326733,
+            "longitude": 87.834419,
+            "altitude": 0
+        },
+        {
+            "name": "xi1ning2",
+            "type": "Router",
+            "latitude": 36.616621,
+            "longitude": 101.777795,
+            "altitude": 0
+        },
+        {
+            "name": "shen1zhen4",
+            "type": "Router",
+            "latitude": 22.543527,
+            "longitude": 114.057939,
+            "altitude": 0
+        },
+        {
+            "name": "wu1lu3mu4qi2",
+            "type": "Router",
+            "latitude": 43.825377,
+            "longitude": 87.616824,
+            "altitude": 0
+        },
+        {
+            "name": "tian1jin1",
+            "type": "Router",
+            "latitude": 39.085318,
+            "longitude": 117.201509,
+            "altitude": 0
+        },
+        {
+            "name": "gu1su1",
+            "type": "Router",
+            "latitude": 31.335648,
+            "longitude": 120.617367,
+            "altitude": 0
+        },
+        {
+            "name": "ding4xi1",
+            "type": "Router",
+            "latitude": 35.607947,
+            "longitude": 104.592342,
+            "altitude": 0
+        },
+        {
+            "name": "gui4lin2",
+            "type": "Router",
+            "latitude": 25.235615,
+            "longitude": 110.179752,
+            "altitude": 0
+        },
+        {
+            "name": "chong2qing4",
+            "type": "Router",
+            "latitude": 29.563707,
+            "longitude": 106.550483,
+            "altitude": 0
+        },
+        {
+            "name": "yi1lan2",
+            "type": "Router",
+            "latitude": 46.325536,
+            "longitude": 129.567777,
+            "altitude": 0
+        },
+        {
+            "name": "xia4men2",
+            "type": "Router",
+            "latitude": 24.479627,
+            "longitude": 118.08891,
+            "altitude": 0
+        },
+        {
+            "name": "quan2jiao1",
+            "type": "Router",
+            "latitude": 32.08593,
+            "longitude": 118.274149,
+            "altitude": 0
+        },
+        {
+            "name": "de2rong2",
+            "type": "Router",
+            "latitude": 28.713085,
+            "longitude": 99.286366,
+            "altitude": 0
+        },
+        {
+            "name": "yin2chuan1",
+            "type": "Router",
+            "latitude": 38.487783,
+            "longitude": 106.230977,
+            "altitude": 0
+        },
+        {
+            "name": "a1li3",
+            "type": "Router",
+            "latitude": 32.500987,
+            "longitude": 80.105786,
+            "altitude": 0
+        },
+        {
+            "name": "qi1xia2",
+            "type": "Router",
+            "latitude": 37.335993,
+            "longitude": 120.849595,
+            "altitude": 0
+        },
+        {
+            "name": "nan2jing1",
+            "type": "Router",
+            "latitude": 32.059344,
+            "longitude": 118.796624,
+            "altitude": 0
+        },
+        {
+            "name": "ping2shan1",
+            "type": "Router",
+            "latitude": 41.299658,
+            "longitude": 123.769081,
+            "altitude": 0
+        },
+        {
+            "name": "wei4yang1",
+            "type": "Router",
+            "latitude": 34.293109,
+            "longitude": 108.946665,
+            "altitude": 0
+        },
+        {
+            "name": "zhen4xing1",
+            "type": "Router",
+            "latitude": 40.129706,
+            "longitude": 124.383382,
+            "altitude": 0
+        },
+        {
+            "name": "yu3shan1",
+            "type": "Router",
+            "latitude": 31.682374,
+            "longitude": 118.498675,
+            "altitude": 0
+        },
+        {
+            "name": "zhao1jue2",
+            "type": "Router",
+            "latitude": 28.015301,
+            "longitude": 102.839849,
+            "altitude": 0
+        },
+        {
+            "name": "chang2chun1",
+            "type": "Router",
+            "latitude": 43.816996,
+            "longitude": 125.323643,
+            "altitude": 0
+        },
+        {
+            "name": "tu1quan2",
+            "type": "Router",
+            "latitude": 45.381918,
+            "longitude": 121.593972,
+            "altitude": 0
+        },
+        {
+            "name": "la1sa4",
+            "type": "Router",
+            "latitude": 29.653491,
+            "longitude": 91.171924,
+            "altitude": 0
+        },
+        {
+            "name": "ha1er3bin1",
+            "type": "Router",
+            "latitude": 45.802981,
+            "longitude": 126.53505,
+            "altitude": 0
+        },
+        {
+            "name": "yong3shan4",
+            "type": "Router",
+            "latitude": 28.229018,
+            "longitude": 103.63756,
+            "altitude": 0
+        },
+        {
+            "name": "shi2jia1zhuang1",
+            "type": "Router",
+            "latitude": 38.042007,
+            "longitude": 114.514976,
+            "altitude": 0
+        }
+    ]
+}

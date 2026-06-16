@@ -1,0 +1,14 @@
+{
+    "host_bak": "127.0.0.1",
+    "host": "192.168.124.107",
+    "username": "test",
+    "password": "test",
+    "exchange": "gr_fe_exchange",
+    "exchange_type": "fanout",
+    "queues": {
+        "control_queue_gr": "control_queue_gr",
+        "nodeinfo_queue": "fe_gr_queue_nodeinfo",
+        "topo_queue": "fe_gr_queue_topo",
+        "map_queue": "fe_gr_queue_map"
+    }
+}

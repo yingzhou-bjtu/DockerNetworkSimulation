@@ -1,0 +1,6 @@
+docker
+Flask
+matplotlib
+networkx
+pika
+toml

@@ -1,0 +1,18 @@
+{
+  "macvlan_configs": [
+    {
+      "netName": "macvlan_1",
+      "parent": "ens33",
+      "subnet": "192.168.124.0/24",
+      "gateway": "192.168.124.1",
+      "ip": "192.168.124.10"
+    },
+    {
+      "netName": "macvlan_2",
+      "parent": "ens37",
+      "subnet": "192.168.125.0/24",
+      "gateway": "192.168.125.1",
+      "ip": "192.168.125.10"
+    }
+  ]
+}
