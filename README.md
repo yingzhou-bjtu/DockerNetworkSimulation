@@ -1,9 +1,13 @@
-# Docker Network Simulation
+# Containerized Routing Network Simulator
 
-Docker Network Simulation is a Python-controlled network simulation toolkit for
-containerized OSPF/LISP experiments. It can generate random routing topologies,
+Containerized Routing Network Simulator is a Python-controlled toolkit for
+Docker-based OSPF/LISP experiments. It can generate random routing topologies,
 start Docker-based nodes, expose REST and RabbitMQ control paths, and write
 topology/configuration artifacts for inspection.
+
+## Project Identity
+
+See [docs/PROJECT_IDENTITY.md](docs/PROJECT_IDENTITY.md) for the public name, repository slug, scope, and directory contract.
 
 ## Features
 

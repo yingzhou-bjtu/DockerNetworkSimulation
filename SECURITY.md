@@ -4,7 +4,7 @@
 
 Please report security, privacy, or credential-exposure issues privately instead of opening a public issue.
 
-Use GitHub's private vulnerability reporting flow when it is available for `yingzhou-bjtu/DockerNetworkSimulation`. If that flow is not enabled, contact the maintainer through the public profile contact channel and include a minimal, non-sensitive reproduction.
+Use GitHub's private vulnerability reporting flow when it is available for `yingzhou-bjtu/containerized-routing-simulator`. If that flow is not enabled, contact the maintainer through the public profile contact channel and include a minimal, non-sensitive reproduction.
 
 ## Scope
 

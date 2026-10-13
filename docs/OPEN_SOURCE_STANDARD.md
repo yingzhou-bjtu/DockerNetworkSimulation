@@ -2,7 +2,7 @@
 
 ## Repository Class
 
-- Repository: `yingzhou-bjtu/DockerNetworkSimulation`
+- Repository: `yingzhou-bjtu/containerized-routing-simulator`
 - Class: Python service and network simulation repository
 - Public scope: Docker-based OSPF/LISP network simulation with REST and RabbitMQ control paths.
 

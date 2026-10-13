@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this repository, please cite it using the metadata in this file."
-title: "Docker-based Network Simulation with OSPF/LISP Support"
+title: "Containerized Routing Network Simulator"
 authors:
   - family-names: "Zhou"
     given-names: "Ying"
-repository-code: "https://github.com/yingzhou-bjtu/DockerNetworkSimulation"
+repository-code: "https://github.com/yingzhou-bjtu/containerized-routing-simulator"

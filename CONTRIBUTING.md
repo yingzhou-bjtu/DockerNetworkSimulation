@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for improving `DockerNetworkSimulation`. This repository is kept public for reproducible research and engineering reuse, so changes should stay small, documented, and easy to verify.
+Thank you for improving `containerized-routing-simulator`. This repository is kept public for reproducible research and engineering reuse, so changes should stay small, documented, and easy to verify.
 
 ## Scope
 
