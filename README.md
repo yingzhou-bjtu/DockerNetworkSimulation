@@ -1,161 +1,102 @@
-<div align="center">
-<!-- Title: -->
-  <h1>Docker Network Simulation</h1>
-<!-- Short description: -->
-  <p>一个基于 Docker 容器的网络模拟仿真工具</p>
-</div>
+# Docker Network Simulation
 
-![截图](./images/cover.png)
+Docker Network Simulation is a Python-controlled network simulation toolkit for
+containerized OSPF/LISP experiments. It can generate random routing topologies,
+start Docker-based nodes, expose REST and RabbitMQ control paths, and write
+topology/configuration artifacts for inspection.
 
-> [!IMPORTANT]  
-> 该项目还在积极开发中。
+## Features
 
-# 介绍
+- Docker-based network and node orchestration.
+- OSPF and LISP-oriented container build files.
+- Flask REST API and RabbitMQ API handlers.
+- NetworkX-based topology generation and visualization.
+- Cleanup helpers for experiment containers and generated output.
 
-快速模拟随机路由拓扑，支持OSPF、LISP节点，支持注入静态路由。
+## Repository Layout
 
-## 特性
-
-- 同时支持Flask RESTful接口和RabbitMQ API接口。
-- 支持容器和网络标签，自动清理实验容器和网络。
-- 基于Networkx自动绘制网络拓扑图。
-
-# 部署
-
-## 初始化Python
-
-进入项目根目录，创建Python3虚拟环境：
-
-```bash
-python3 -m venv venv
+```text
+.
+├── run.py                       # service entry point
+├── quick_test.py                # lightweight simulation smoke check
+├── quick_clean.py               # cleanup helper
+├── src/                         # topology and simulation primitives
+├── app/                         # REST and RabbitMQ API implementations
+├── configs/                     # API, MQ, macvlan, and static topology config
+├── docker/                      # Dockerfiles and protocol-specific build assets
+├── oor-compose/                 # OpenOverlayRouter compose assets
+├── images/                      # README and documentation images
+├── output/                      # generated topology/config artifacts
+└── docs/OPEN_SOURCE_STANDARD.md # repository hygiene and layout policy
 ```
 
-激活虚拟环境：
+## Requirements
+
+- Python 3.10+
+- Docker Engine with permission to build and run containers
+- RabbitMQ when using the MQ API path
+
+Install Python dependencies:
 
 ```bash
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-安装依赖：
+Build container images:
 
 ```bash
-pip install -r requirements.txt
+make -C docker
 ```
 
-## 初始化Docker
+## Quick Start
 
-确保docker可以正常拉取静像，请检查网络。
-
-进入docker目录，执行：
+Start the API service:
 
 ```bash
-make
+python run.py
 ```
 
-## 使用
-
-~~进入`configs`目录，修改配置文件：~~
-
-- ~~`api_config.toml`：API配置文件~~
-- ~~`macvlan_configs.json`：用于配置物理网卡容器直通（需修改代码引用）~~
-
-该配置已基于使用场景进行定制。注意修改`configs/mq_config.json`文件，灵活配置mq的host地址。
-
-使用API启动：
+Run a local smoke check:
 
 ```bash
-python3 run.py
+python quick_test.py
 ```
 
-独立测试：
+Clean generated containers and networks:
 
 ```bash
-python3 quick_test.py
+python quick_clean.py
 ```
 
-清理：
+Generated topology and LISP files are written under `output/`.
+
+## Configuration
+
+- `configs/api_config.toml`: REST API configuration.
+- `configs/mq_config.json`: RabbitMQ host, queue, and exchange settings.
+- `configs/macvlan_configs.json`: macvlan-related host networking settings.
+- `configs/static_topo*.json`: static topology examples.
+
+Do not commit machine-specific hostnames, credentials, or private network
+addresses. Use local environment variables or ignored local config copies for
+private deployments.
+
+## API Notes
+
+The historical Chinese API notes are kept in `app/api_documentation_zh.md` and
+`app/mq测试用例.md`. New API documentation should be added under `docs/` and
+linked from this README.
+
+## Validation
+
+For documentation-only changes:
 
 ```bash
-python3 quick_clean.py
+git diff --check
+python3 -m py_compile run.py quick_test.py quick_clean.py
 ```
 
-可以在`output`目录中观察自动生成的拓扑图和LISP配置文件。
-
-# 接口文档
-
-TBD
-
-~~[2024.10.10 - beta](./app/api_documentation_zh.md)~~
-
-
-# 实用工具
-
-## Portainer
-
-[Install Portainer CE with Docker on Linux - Portainer Documentation](https://docs.portainer.io/start/install-ce/server/docker/linux)
-
-用于docker容器可视化。
-
-### 部署
-
-首先，创建 Portainer Server 将用于存储其数据库的卷：
-
-```bash
-sudo docker volume create portainer_data
-```
-
-然后，下载并安装 Portainer Server 容器：
-
-```bash
-sudo docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
-```
-
-### 启动
-
-访问https：
-
-```bash
-https://localhost:9443
-```
-
-## Edgeshark
-
-[siemens/edgeshark: Discover and capture container network traffic from your comfy desktop Wireshark, using a containerized service and a Wireshark plugin. (github.com)](https://github.com/siemens/edgeshark#docker-host)
-
-该工具通过构建容器的方式，可以顺利获取docker内部所有的容器，以及它们之间构成的网络。只需再安装一个插件程序，即可在任意docker网络中调用wireshark进行抓包分析。
-
-### 使用方法
-
-要仅在 localhost 上公开服务 TCP 端口 5001，请执行以下操作：
-
-```bash
-wget -q --no-cache -O - https://github.com/siemens/edgeshark/raw/main/deployments/wget/docker-compose-localhost.yaml | docker compose -f - up
-```
-
-要向远程客户端公开服务 TCP 端口 5001，请执行以下操作：
-
-```bash
-wget -q --no-cache -O - \
-  https://github.com/siemens/edgeshark/raw/main/deployments/wget/docker-compose.yaml \
-  | docker compose -f - up
-```
-
-最后，访问 http://localhost:5001 并开始查看容器主机虚拟网络。
-
-如果想使用 Wireshark 实时捕获流量，需要下载[ csharg extcap](https://github.com/siemens/cshargextcap/releases) 插件并安装。在release中找到对应系统的安装文件，安装即可。
-
-## RabbitMQ
-
-[RabbitMQ: One broker to queue them all | RabbitMQ](https://www.rabbitmq.com/)
-
-RabbitMQ 是一种可靠且成熟的消息传递和流媒体代理，可以轻松部署在云环境、本地和本地计算机上。
-
-### 部署
-
-```bash
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:management
-```
-
-### 使用
-
-可以通过在浏览器中访问 http://localhost:15672 来访问管理插件后台页面，默认用户名/密码：`guest`/`guest`
+For runtime changes, also run the Docker build and the smallest topology smoke
+test that exercises the changed API path.

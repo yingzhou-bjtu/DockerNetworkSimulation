@@ -6,3 +6,9 @@ __pycache__/
 .mypy_cache/
 .env
 .DS_Store
+
+
+# Generated simulation state
+output/*.png
+output/*.json
+!output/README.md
