@@ -1,0 +1,35 @@
+name: Repository checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check whitespace
+        run: git diff --check HEAD~1..HEAD || git diff --check
+      - name: Compile Python sources
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import py_compile
+
+          excluded = {".git", ".venv", "venv", "__pycache__", "data", "dataset", "datasets"}
+          failures = []
+          for path in Path(".").rglob("*.py"):
+              if set(path.parts) & excluded:
+                  continue
+              try:
+                  py_compile.compile(str(path), doraise=True)
+              except py_compile.PyCompileError as exc:
+                  failures.append(f"{path}: {exc.msg}")
+          if failures:
+              raise SystemExit("\n".join(failures))
+          print("Python compile check passed")
+          PY
