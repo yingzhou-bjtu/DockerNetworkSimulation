@@ -62,6 +62,13 @@ Start the API service:
 python run.py
 ```
 
+The default `joint-mq` mode keeps the integrated RabbitMQ control path. To use
+the TOML-defined Flask/RabbitMQ service combination, run:
+
+```bash
+python run.py --mode configured --config configs/api_config.toml
+```
+
 Use a non-default MQ configuration:
 
 ```bash
