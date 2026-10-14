@@ -100,7 +100,9 @@ Convert the bundled Chinese static topology fixture to pinyin:
 python -m scripts.convert_topology_to_pinyin --input configs/static_topo.json --output configs/static_topo_pinyin.json
 ```
 
-Generated topology and LISP files are written under `output/`.
+Conversion output must be a JSON file, must not overwrite the input topology,
+and must be written under `configs/` or `output/` when the destination is inside
+this repository. Generated topology and LISP files are written under `output/`.
 
 ## Configuration
 
