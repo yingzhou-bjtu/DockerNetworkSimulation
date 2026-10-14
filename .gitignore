@@ -7,6 +7,14 @@ __pycache__/
 .env
 .DS_Store
 
+# C build outputs and local runtime logs
+*.o
+*.gch
+*.log
+*.bak
+docker/socket/autoforward
+docker/socket/send_to_yoyo
+docker/socket/udp_forward
 
 # Generated simulation state
 output/*.png
