@@ -54,7 +54,7 @@ def start_configured_services(config_file=None):
         threads.append(
             threading.Thread(
                 target=start_standard_rabbitmq,
-                args=(network_handler, config_loader.get_rabbitmq_config()),
+                args=(network_handler, config_loader.get_standard_rabbitmq_config()),
                 name='routing-sim-rabbitmq',
             )
         )

@@ -1,32 +1,13 @@
-from dataclasses import dataclass
 import uuid
 import json
 
 from app.config_loader import ConfigLoader
-
-
-@dataclass(frozen=True)
-class VireClientConfig:
-    host: str = 'localhost'
-    exchange_type: str = 'direct'
-    request_exchange: str = 'vire-bjtu-exchange'
-    response_exchange: str = 'bjtu-vire-exchange'
-    request_queue: str = 'vire-bjtu-queue'
-    response_queue: str = 'bjtu-vire-queue'
-    routing_key: str = ''
+from app.rabbitmq_config import VireClientConfig
 
 
 def load_vire_client_config(config_file=None):
-    rabbitmq_config = ConfigLoader(config_file).get_rabbitmq_config()
-    return VireClientConfig(
-        host=rabbitmq_config['host'],
-        exchange_type=rabbitmq_config['exchange_type'],
-        request_exchange=rabbitmq_config.get('request_exchange', VireClientConfig.request_exchange),
-        response_exchange=rabbitmq_config['exchange_name'],
-        request_queue=rabbitmq_config['inbound_queue'],
-        response_queue=rabbitmq_config['outbound_queue'],
-        routing_key=rabbitmq_config['routing_key'],
-    )
+    rabbitmq_config = ConfigLoader(config_file).get_standard_rabbitmq_config()
+    return VireClientConfig.from_standard_config(rabbitmq_config)
 
 
 class VireClient:

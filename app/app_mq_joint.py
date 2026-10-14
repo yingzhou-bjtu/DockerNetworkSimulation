@@ -1,25 +1,27 @@
 import argparse
 import json
 from .config_loader import MQ_CONFIG_ENV, load_json_config
+from .rabbitmq_config import JointRabbitMQConfig, ensure_joint_rabbitmq_config
 
 
 class RabbitMQHandler:
     def __init__(self, config):
         """
         初始化RabbitMQ连接
-        :param config: 配置字典，包括服务器信息、交换器、队列等
+        :param config: RabbitMQ service configuration.
         """
         from .mq_api_handler import NetworkAPIHandler
 
+        self.config = ensure_joint_rabbitmq_config(config)
         self.handler = NetworkAPIHandler(self.send_message)
 
         # 从配置字典中读取参数
-        self.host = config['host']
-        self.exchange = config['exchange']
-        self.exchange_type = config['exchange_type']
-        self.queues = config['queues']
-        self.username = config['username']
-        self.password = config['password']
+        self.host = self.config.host
+        self.exchange = self.config.exchange
+        self.exchange_type = self.config.exchange_type
+        self.queues = self.config.queues
+        self.username = self.config.username
+        self.password = self.config.password
 
         self.connection, self.channel = self.create_connection_and_channel()
         self.connection_send, self.channel_send = self.create_connection_and_channel()
@@ -29,7 +31,7 @@ class RabbitMQHandler:
                                       auto_delete=False, durable=True)
 
         # 声明队列
-        for queue in self.queues.values():
+        for queue in self.queues.names():
             self.channel.queue_declare(queue=queue, auto_delete=False, durable=True)
 
     def create_connection_and_channel(self):
@@ -42,7 +44,7 @@ class RabbitMQHandler:
         return connection, channel
 
     def process_control_queue(self, ch, method, properties, body):
-        queue_name = self.queues['control_queue_gr']
+        queue_name = self.queues.control_queue_gr
         # try:
         message = json.loads(body)
         print(f"-> 收到来自{queue_name}的消息: {message}")
@@ -75,7 +77,7 @@ class RabbitMQHandler:
         #     print(f"在{queue_name}中发生错误，详情：{e}")
 
     def process_nodeinfo_queue(self, ch, method, properties, body):
-        queue_name = self.queues['nodeinfo_queue']
+        queue_name = self.queues.nodeinfo_queue
         try:
             message = json.loads(body)
             print(f"-> 收到来自{queue_name}的消息: {message}")
@@ -84,7 +86,7 @@ class RabbitMQHandler:
             print(f"在{queue_name}中发生错误，详情：{e}")
 
     def process_topo_queue(self, ch, method, properties, body):
-        queue_name = self.queues['topo_queue']
+        queue_name = self.queues.topo_queue
         try:
             message = json.loads(body)
             print(f"-> 收到来自{queue_name}的消息: {message}")
@@ -93,7 +95,7 @@ class RabbitMQHandler:
             print(f"在{queue_name}中发生错误，详情：{e}")
 
     def process_map_queue(self, ch, method, properties, body):
-        queue_name = self.queues['map_queue']
+        queue_name = self.queues.map_queue
         try:
             message = json.loads(body)
             print(f"-> 收到来自{queue_name}的消息: {message}")
@@ -111,16 +113,16 @@ class RabbitMQHandler:
             print(f"在{queue_name}中发生错误，详情：{e}")
 
     def start_listening(self):
-        self.channel.basic_consume(queue=self.queues['control_queue_gr'],
+        self.channel.basic_consume(queue=self.queues.control_queue_gr,
                                    on_message_callback=self.process_control_queue, auto_ack=True)
-        self.channel.basic_consume(queue=self.queues['nodeinfo_queue'],
+        self.channel.basic_consume(queue=self.queues.nodeinfo_queue,
                                    on_message_callback=self.process_nodeinfo_queue, auto_ack=True)
-        self.channel.basic_consume(queue=self.queues['topo_queue'],
+        self.channel.basic_consume(queue=self.queues.topo_queue,
                                    on_message_callback=self.process_topo_queue, auto_ack=True)
-        self.channel.basic_consume(queue=self.queues['map_queue'],
+        self.channel.basic_consume(queue=self.queues.map_queue,
                                    on_message_callback=self.process_map_queue, auto_ack=True)
 
-        print(f'-> RabbitMQ API已启动，正在监听 {list(self.queues.values())}')
+        print(f'-> RabbitMQ API已启动，正在监听 {list(self.queues.names())}')
         self.channel.start_consuming()
 
     def send_message(self, message, routing_key=''):
@@ -141,7 +143,7 @@ class RabbitMQHandler:
 
 
 def start_rabbitmq_consumer(config_file=None):
-    config = load_json_config(config_file)
+    config = JointRabbitMQConfig.from_mapping(load_json_config(config_file))
     rabbitmq_handler = RabbitMQHandler(config)
     # rabbitmq_handler.send_message({"test":"test"})
     try:

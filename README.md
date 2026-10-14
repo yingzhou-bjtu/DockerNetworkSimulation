@@ -25,7 +25,7 @@ See [docs/PROJECT_IDENTITY.md](docs/PROJECT_IDENTITY.md) for the public name, re
 ├── quick_test.py                # lightweight simulation smoke check
 ├── quick_clean.py               # cleanup helper
 ├── src/                         # topology and simulation primitives
-├── app/                         # REST and RabbitMQ API implementations
+├── app/                         # REST/RabbitMQ APIs and typed runtime config
 ├── configs/                     # API, MQ, macvlan, and static topology config
 ├── docker/                      # Dockerfiles and protocol-specific build assets
 ├── oor-compose/                 # OpenOverlayRouter compose assets
@@ -103,6 +103,12 @@ Generated topology and LISP files are written under `output/`.
 - `configs/macvlan_configs.json`: macvlan-related host networking settings.
 - `configs/static_topo*.json`: static topology examples.
 
+RabbitMQ settings are normalized in `app/rabbitmq_config.py` before handlers
+open network connections. The TOML-defined service path uses
+`StandardRabbitMQConfig`, the Vire/BJTU client derives `VireClientConfig` from
+that same service config, and the JSON-defined joint MQ path uses
+`JointRabbitMQConfig`.
+
 Runtime configuration can be supplied with explicit paths or environment
 variables:
 
@@ -128,7 +134,7 @@ For documentation-only changes:
 
 ```bash
 git diff --check
-python3 -m py_compile run.py quick_test.py quick_clean.py mq_tool.py app/config_loader.py
+python3 -m py_compile run.py quick_test.py quick_clean.py mq_tool.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/service_runner.py
 python3 -m pytest tests/test_mq_tool_config.py
 ```
 

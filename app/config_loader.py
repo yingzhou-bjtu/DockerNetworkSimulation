@@ -2,6 +2,8 @@ import json
 import os
 from pathlib import Path
 
+from .rabbitmq_config import StandardRabbitMQConfig
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_API_CONFIG = PROJECT_ROOT / 'configs' / 'api_config.toml'
@@ -63,6 +65,9 @@ class ConfigLoader:
             "outbound_queue": rabbitmq_config.get('queues', {}).get('outbound', 'queue2'),
             "routing_key": rabbitmq_config.get('routing', {}).get('key', '')
         }
+
+    def get_standard_rabbitmq_config(self):
+        return StandardRabbitMQConfig.from_mapping(self.get_rabbitmq_config())
 
     def get_api_type(self):
         return self.config.get('app', {}).get('api_type', ['flask'])
