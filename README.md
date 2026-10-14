@@ -127,7 +127,10 @@ debug values fail before the API thread is launched.
 Topology planning is kept in `src/topology.py`, while Docker network creation
 is isolated behind `src/docker_backend.py`. Unit tests can exercise topology
 state with an injected in-memory network backend, and real container runs only
-touch the Docker SDK when a Docker operation is executed.
+touch the Docker SDK when a Docker operation is executed. Topology planners
+validate dimensions before allocating Docker resources: random topologies need
+a positive node count, circle topologies need at least three nodes, and grid
+topologies need positive row and column counts.
 
 Runtime configuration can be supplied with explicit paths or environment
 variables:

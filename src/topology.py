@@ -4,6 +4,14 @@ import random
 DEFAULT_COORDINATES = {"latitude": 0.0, "longitude": 0.0}
 
 
+def require_positive_int(name, value):
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise TypeError(f"{name} must be an integer")
+    if value < 1:
+        raise ValueError(f"{name} must be at least 1")
+    return value
+
+
 def router_node_specs(node_names):
     return [
         {"name": node_name, "type": "Router", "coordinates": dict(DEFAULT_COORDINATES)}
@@ -12,6 +20,7 @@ def router_node_specs(node_names):
 
 
 def random_router_topology(count, rng=None):
+    require_positive_int("count", count)
     rng = rng or random
     nodes = [f"node_{index + 1}" for index in range(count)]
     edges = set()
@@ -50,12 +59,17 @@ def random_router_topology(count, rng=None):
 
 
 def circle_router_topology(count):
+    require_positive_int("count", count)
+    if count < 3:
+        raise ValueError("count must be at least 3 for a circle topology")
     nodes = [f"node_{index + 1}" for index in range(count)]
     edges = [(nodes[index], nodes[(index + 1) % count]) for index in range(count)]
     return router_node_specs(nodes), edges
 
 
 def grid_router_topology(rows, cols):
+    require_positive_int("rows", rows)
+    require_positive_int("cols", cols)
     nodes = [f"node_{row * cols + col + 1}" for row in range(rows) for col in range(cols)]
     edges = []
     for row in range(rows):

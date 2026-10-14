@@ -90,6 +90,23 @@ def test_random_topology_planner_is_deterministic_with_seeded_rng():
     ]
 
 
+def test_topology_planners_reject_invalid_dimensions():
+    with pytest.raises(ValueError, match="count"):
+        random_router_topology(0)
+
+    with pytest.raises(TypeError, match="count"):
+        random_router_topology(True)
+
+    with pytest.raises(ValueError, match="at least 3"):
+        circle_router_topology(2)
+
+    with pytest.raises(ValueError, match="rows"):
+        grid_router_topology(0, 2)
+
+    with pytest.raises(TypeError, match="cols"):
+        grid_router_topology(2, "3")
+
+
 def test_network_simulation_uses_injected_network_backend_for_topology_state():
     backend = MemoryNetworkBackend()
     simulation = NetworkSimulation(docker_backend=backend)
