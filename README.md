@@ -85,6 +85,7 @@ Run a local smoke check:
 
 ```bash
 python -m scripts.quick_test
+python -m scripts.quick_test --nodes 6 --msmr 2 --xtr-edge node_2:xtr_a
 ```
 
 Clean generated containers and networks:
