@@ -1,7 +1,6 @@
-import os
-import pika
+import argparse
 import json
-from .mq_api_handler import NetworkAPIHandler
+from .config_loader import MQ_CONFIG_ENV, load_json_config
 
 
 class RabbitMQHandler:
@@ -10,6 +9,8 @@ class RabbitMQHandler:
         初始化RabbitMQ连接
         :param config: 配置字典，包括服务器信息、交换器、队列等
         """
+        from .mq_api_handler import NetworkAPIHandler
+
         self.handler = NetworkAPIHandler(self.send_message)
 
         # 从配置字典中读取参数
@@ -32,6 +33,8 @@ class RabbitMQHandler:
             self.channel.queue_declare(queue=queue, auto_delete=False, durable=True)
 
     def create_connection_and_channel(self):
+        import pika
+
         credentials = pika.PlainCredentials(self.username, self.password)
         connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.host,
                                                                        credentials=credentials, heartbeat=0))
@@ -137,12 +140,8 @@ class RabbitMQHandler:
             self.connection_send.close()
 
 
-def start_rabbitmq_consumer():
-    # 从 JSON 文件加载配置
-    config_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../configs/mq_config.json')
-    with open(config_path, 'r') as config_file:
-        config = json.load(config_file)
-
+def start_rabbitmq_consumer(config_file=None):
+    config = load_json_config(config_file)
     rabbitmq_handler = RabbitMQHandler(config)
     # rabbitmq_handler.send_message({"test":"test"})
     try:
@@ -153,5 +152,19 @@ def start_rabbitmq_consumer():
         rabbitmq_handler.close_connection()
 
 
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(description='Start the joint RabbitMQ API service.')
+    parser.add_argument(
+        '--config',
+        help=f'Path to mq_config.json. Defaults to configs/mq_config.json or ${MQ_CONFIG_ENV}.',
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    start_rabbitmq_consumer(args.config)
+
+
 if __name__ == '__main__':
-    start_rabbitmq_consumer()
+    main()

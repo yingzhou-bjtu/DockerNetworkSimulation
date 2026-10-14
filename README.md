@@ -62,6 +62,12 @@ Start the API service:
 python run.py
 ```
 
+Use a non-default MQ configuration:
+
+```bash
+python run.py --config configs/mq_config.json
+```
+
 Run a local smoke check:
 
 ```bash
@@ -82,6 +88,15 @@ Generated topology and LISP files are written under `output/`.
 - `configs/mq_config.json`: RabbitMQ host, queue, and exchange settings.
 - `configs/macvlan_configs.json`: macvlan-related host networking settings.
 - `configs/static_topo*.json`: static topology examples.
+
+Runtime configuration can be supplied with explicit paths or environment
+variables:
+
+```bash
+python run.py --config configs/mq_config.json
+ROUTING_SIM_MQ_CONFIG=configs/mq_config.json python -m app.app_mq_joint
+ROUTING_SIM_API_CONFIG=configs/api_config.toml python -c "from app.config_loader import ConfigLoader; ConfigLoader()"
+```
 
 Do not commit machine-specific hostnames, credentials, or private network
 addresses. Use local environment variables or ignored local config copies for
