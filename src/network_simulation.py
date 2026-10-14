@@ -1,7 +1,5 @@
-import glob
 import ipaddress
 import json
-import os
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 from time import sleep
@@ -13,6 +11,7 @@ import matplotlib.pyplot as plt
 from .docker_backend import DockerNetworkBackend
 from .ip_tools import IPAddressAllocator
 from .nodes import RouterNode, LISPNode, ClientNode, FrrOSPFRouterNode, Node
+from .paths import get_config_dir, get_config_path, get_output_dir
 from .topology import (
     circle_router_topology,
     grid_router_topology,
@@ -22,7 +21,13 @@ from .topology import (
 
 
 class NetworkSimulation:
-    def __init__(self, docker_backend=None, group_label="network_simulation_group"):
+    def __init__(
+        self,
+        docker_backend=None,
+        group_label="network_simulation_group",
+        output_dir=None,
+        config_dir=None,
+    ):
         self.nodes = []  # 所有节点
         self.router_nodes = []  # 路由节点
         self.xtr_nodes = []  # xtr节点
@@ -37,6 +42,8 @@ class NetworkSimulation:
         self.ip_allocator = IPAddressAllocator()  # ip分配工具
         self.is_running = False
         self.group_label = group_label  # docker标签
+        self.output_dir = get_output_dir(output_dir)
+        self.config_dir = get_config_dir(config_dir)
         self.docker_backend = docker_backend or DockerNetworkBackend(group_label=self.group_label)
         self.next_subnet = iter(self.base_network.subnets(new_prefix=self.subnet_prefixlen))  # 子网迭代器
 
@@ -125,7 +132,7 @@ class NetworkSimulation:
         for node_js in nodes:
             node_name = node_js['name']
             # node = FrrOSPFRouterNode(node_name, self.ip_allocator, self.group_label, self.networks)
-            node = RouterNode(node_name, self.ip_allocator, self.group_label, self.networks)
+            node = RouterNode(node_name, self.ip_allocator, self.group_label, self.networks, output_dir=self.output_dir)
             node.coordinates = node_js['coordinates']
             self.router_nodes.append(node)
             self.graph.add_node(node_name)
@@ -234,7 +241,7 @@ class NetworkSimulation:
 
         # plt.tight_layout()  # 自动调整子图参数，使之填充整个图像区域
         # plt.show()
-        plt.savefig(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output/topo.png'))
+        plt.savefig(self.output_dir / 'topo.png')
 
     def create_static_routes(self):
         """
@@ -297,7 +304,14 @@ class NetworkSimulation:
         unused_routers = self.nodes[:]  # 初始所有路由器都未使用
         for i in range(num_nodes):
             node_name = f"{node_type}{i + 1}"
-            lisp_node = LISPNode(node_name, self.ip_allocator, self.group_label, self.networks, node_type=node_type)
+            lisp_node = LISPNode(
+                node_name,
+                self.ip_allocator,
+                self.group_label,
+                self.networks,
+                node_type=node_type,
+                output_dir=self.output_dir,
+            )
             network_name = self.create_network()  # 创建网络
             lisp_node.assign_ip(network_name)  # 为LISP节点分配IP
 
@@ -332,7 +346,14 @@ class NetworkSimulation:
             # 如果找到路由器且确定了 xTR 名称
             if router and xtr_name:
                 # 使用 xtr_name 创建 xTR 节点
-                xtr_node = LISPNode(xtr_name, self.ip_allocator, self.group_label, self.networks, node_type='xTR')
+                xtr_node = LISPNode(
+                    xtr_name,
+                    self.ip_allocator,
+                    self.group_label,
+                    self.networks,
+                    node_type='xTR',
+                    output_dir=self.output_dir,
+                )
                 # 创建网络并分配 IP
                 network_name = self.create_network()
                 xtr_node.assign_ip(network_name)
@@ -369,7 +390,13 @@ class NetworkSimulation:
 
         # 创建客户端节点并连接到xTR节点
         for i, xtr_node in enumerate(self.xtr_nodes):  # 直接根据xTR数量创建客户端节点
-            client_node = ClientNode(f"Client{i + 1}", self.ip_allocator, self.group_label, self.networks)
+            client_node = ClientNode(
+                f"Client{i + 1}",
+                self.ip_allocator,
+                self.group_label,
+                self.networks,
+                output_dir=self.output_dir,
+            )
             network_name = self.create_network()  # 为客户端和xTR节点创建网络
             client_node.assign_ip(network_name)
             xtr_node.assign_ip(network_name)
@@ -402,7 +429,13 @@ class NetworkSimulation:
 
         # 创建客户端节点并连接到xTR节点
         for i, xtr_node in enumerate(self.xtr_nodes):  # 直接根据xTR数量创建客户端节点
-            client_node = ClientNode(f"Client{i + 1}", self.ip_allocator, self.group_label, self.networks)
+            client_node = ClientNode(
+                f"Client{i + 1}",
+                self.ip_allocator,
+                self.group_label,
+                self.networks,
+                output_dir=self.output_dir,
+            )
             xtr_simple_ip = xtr_eid_map.get(xtr_node.name)
             network_cidr = ipaddress.IPv4Network(xtr_simple_ip, strict=False)  # 转换为/24的网络
             network_name = self.create_manual_network(network_cidr)
@@ -431,9 +464,8 @@ class NetworkSimulation:
     def create_lisp_macvlan(self, num_msmr=1):
         print('正在创建lisp_macvlan节点……')
         # 读取macvlan配置
-        config_dir = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), '../configs/macvlan_configs.json')  # 配置文件夹路径
-        with open(config_dir, 'r') as file:
+        config_path = get_config_path('macvlan_configs.json', self.config_dir)
+        with config_path.open('r', encoding='utf-8') as file:
             config_list = json.load(file)['macvlan_configs']
             print(config_list)
 
@@ -468,17 +500,11 @@ class NetworkSimulation:
         self.nodes.extend(self.xtr_nodes + self.msmr_nodes)
         print('lisp_macvlan节点创建完毕')
 
-    @staticmethod
-    def cleanup_config_files():
+    def cleanup_config_files(self):
         """清理指定配置文件夹中的所有配置文件"""
         print('开始清理配置文件……')
-        config_dir_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output')
-        if os.path.exists(config_dir_path):
-            config_files = glob.glob(os.path.join(config_dir_path, '*.conf'))
-            log_files = glob.glob(os.path.join(config_dir_path, '*.log'))
-            all_files = config_files + log_files
-            for file_path in all_files:
-                os.remove(file_path)
+        for file_path in list(self.output_dir.glob('*.conf')) + list(self.output_dir.glob('*.log')):
+            file_path.unlink()
         print('清理配置文件完毕')
 
     def get_pair_delay_by_name(self, src_node_name, dst_node_name, count=1):

@@ -133,6 +133,11 @@ ROUTING_SIM_MQ_CONFIG=configs/mq_config.json python -m app.app_mq_joint
 ROUTING_SIM_API_CONFIG=configs/api_config.toml python -c "from app.config_loader import ConfigLoader; ConfigLoader()"
 ```
 
+Generated topology, LISP, and forwarding artifacts default to `output/`.
+Override them with `ROUTING_SIM_OUTPUT_DIR` or the `NetworkSimulation` /
+`NetworkAPIHandler` `output_dir` argument. The macvlan config directory
+defaults to `configs/` and can be overridden with `ROUTING_SIM_CONFIG_DIR`.
+
 Do not commit machine-specific hostnames, credentials, or private network
 addresses. Use local environment variables or ignored local config copies for
 private deployments.
@@ -149,8 +154,8 @@ For documentation-only changes:
 
 ```bash
 git diff --check
-python3 -m py_compile run.py mq_tool.py scripts/*.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/service_runner.py
-python3 -m py_compile src/docker_backend.py src/topology.py src/network_simulation.py src/nodes.py
+python3 -m py_compile run.py mq_tool.py scripts/*.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/mq_api_handler.py app/service_runner.py
+python3 -m py_compile src/docker_backend.py src/topology.py src/network_simulation.py src/nodes.py src/paths.py
 python3 -m pytest tests/test_mq_tool_config.py tests/test_topology_planning.py tests/test_script_helpers.py
 ```
 

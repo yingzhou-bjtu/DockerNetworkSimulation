@@ -1,7 +1,6 @@
 import atexit
 import ipaddress
 import json
-import os
 import re
 import subprocess
 import threading
@@ -9,18 +8,20 @@ from itertools import combinations
 from time import sleep
 
 from src.network_simulation import NetworkSimulation
+from src.paths import PROJECT_ROOT, get_output_dir
 
 
 class NetworkAPIHandler:
-    def __init__(self, mq_sender):
-        self.ns = NetworkSimulation()
+    def __init__(self, mq_sender=None, output_dir=None):
+        self.output_dir = get_output_dir(output_dir)
+        self.ns = NetworkSimulation(output_dir=self.output_dir)
         self.is_starting = False
         self.is_started = False
         self.is_sender_started = False
 
         self.node_info = []
         self.edges = []
-        self.mq_sender = mq_sender
+        self.mq_sender = mq_sender or (lambda message: None)
         self.forward_process = None
 
     def cleanup(self):
@@ -58,9 +59,9 @@ class NetworkAPIHandler:
         self.ns.display_network_topology()
         self.ns.start_simulation()
 
-        binary_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../docker/socket/udp_forward')
-        log_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output/forward.log')
-        map_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output/forward_targets.json')
+        binary_path = PROJECT_ROOT / 'docker' / 'socket' / 'udp_forward'
+        log_file_path = self.output_dir / 'forward.log'
+        map_file_path = self.output_dir / 'forward_targets.json'
         self.forward_process = self.start_binary(binary_path, log_file_path, "5132", "5132", "0", map_file_path)
         print(f"转发进程{self.forward_process.pid}已启动，日志路径：{log_file_path}")
 
@@ -117,17 +118,15 @@ class NetworkAPIHandler:
         self.edges = edges
         print('已更新拓扑配置')
 
-    @staticmethod
-    def create_mapping(mapping_info):
+    def create_mapping(self, mapping_info):
         js_list = []
         for mapping in mapping_info:
             source = mapping.get("ExternalIP")
             destination = mapping.get("SimIP")
             js_list.append({"source": source, "destination": destination})
         js = {"forward_targets": js_list}
-        js_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output/forward_targets.json')
-        with open(js_path, 'w') as f:
-            f.write(json.dumps(js))
+        js_path = self.output_dir / 'forward_targets.json'
+        js_path.write_text(json.dumps(js), encoding='utf-8')
         print('映射文件保存成功')
 
     def remove_mapping(self):
@@ -240,7 +239,7 @@ class NetworkAPIHandler:
         log_file = open(log_file_path, "w")
         # 使用 stdbuf 禁用缓冲
         process = subprocess.Popen(
-            ["stdbuf", "-oL", "-eL", binary_path, *args],  # -oL 禁用标准输出缓冲，-eL 禁用标准错误缓冲
+            ["stdbuf", "-oL", "-eL", str(binary_path), *map(str, args)],  # -oL 禁用标准输出缓冲，-eL 禁用标准错误缓冲
             stdout=log_file,  # 重定向标准输出到文件
             stderr=log_file  # 重定向标准错误到文件
         )

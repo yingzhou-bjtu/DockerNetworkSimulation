@@ -3,12 +3,13 @@ import os
 import re
 
 from .docker_backend import create_docker_client
+from .paths import get_output_dir
 
 
 class Node:
     """通用节点基类，包含IP地址管理和Docker容器的基本操作"""
 
-    def __init__(self, name, ip_allocator, group_label, networks, docker_client=None):
+    def __init__(self, name, ip_allocator, group_label, networks, docker_client=None, output_dir=None):
         self.name = name
         self.network_ips = {}  # 用于存储每个网络的 IP 地址，network_name-ip
         self.container = None
@@ -17,6 +18,7 @@ class Node:
         self.networks = networks
         self.coordinates = {"latitude": 0.0, "longitude": 0.0}
         self._client = docker_client
+        self.output_dir = get_output_dir(output_dir)
 
     @property
     def client(self):
@@ -272,8 +274,8 @@ class Node:
 class RouterNode(Node):
     """路由设备类，继承自Node类，表示传统路由器节点"""
 
-    def __init__(self, name, ip_allocator, group_label, networks):
-        super().__init__(name, ip_allocator, group_label, networks)  # 调用基类的构造函数
+    def __init__(self, name, ip_allocator, group_label, networks, output_dir=None):
+        super().__init__(name, ip_allocator, group_label, networks, output_dir=output_dir)  # 调用基类的构造函数
         self.node_type = "Router"
 
     def start(self):
@@ -304,15 +306,15 @@ class RouterNode(Node):
 class FrrOSPFRouterNode(Node):
     """Frr OSPF路由类，继承自Node类"""
 
-    def __init__(self, name, ip_allocator, group_label, networks):
-        super().__init__(name, ip_allocator, group_label, networks)  # 调用基类的构造函数
+    def __init__(self, name, ip_allocator, group_label, networks, output_dir=None):
+        super().__init__(name, ip_allocator, group_label, networks, output_dir=output_dir)  # 调用基类的构造函数
         self.node_type = "Router"
         self.frr_config_file = None  # frr配置文件路径
         self.vtysh_config_file = None  # vtysh配置文件路径
 
     def generate_frr_config_file(self):
         """动态生成FRR OSPF配置文件"""
-        config_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output')  # 配置文件夹路径
+        config_dir = str(self.output_dir)  # 配置文件夹路径
         os.makedirs(config_dir, exist_ok=True)  # 如果文件夹不存在，则创建
 
         self.frr_config_file = os.path.join(config_dir, f"{self.name}_frr.conf")  # frr配置文件路径
@@ -363,8 +365,8 @@ class FrrOSPFRouterNode(Node):
 class LISPNode(Node):
     """LISP节点类，继承自Node类，用于实现LISP功能节点（xTR、MSMR等）"""
 
-    def __init__(self, name, ip_allocator, group_label, networks, node_type):
-        super().__init__(name, ip_allocator, group_label, networks)
+    def __init__(self, name, ip_allocator, group_label, networks, node_type, output_dir=None):
+        super().__init__(name, ip_allocator, group_label, networks, output_dir=output_dir)
         self.node_type = node_type  # 配置文件类型，例如 xTR 或 MSMR
         self.config_file = None  # 配置文件路径
 
@@ -381,7 +383,7 @@ class LISPNode(Node):
         if rloc_ip:
             self.rloc_ip = rloc_ip
 
-        config_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output')  # 配置文件夹路径
+        config_dir = str(self.output_dir)  # 配置文件夹路径
         os.makedirs(config_dir, exist_ok=True)  # 如果文件夹不存在，则创建
 
         self.config_file = os.path.join(config_dir, f"{self.name}.conf")  # 配置文件路径
@@ -440,7 +442,7 @@ class LISPNode(Node):
 
     def generate_msmr_config_file(self, eid_prefixes):
         """动态生成MSMR配置文件，支持多个xTR节点的EID前缀"""
-        config_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output')  # 配置文件夹路径
+        config_dir = str(self.output_dir)  # 配置文件夹路径
         os.makedirs(config_dir, exist_ok=True)  # 如果文件夹不存在，则创建
 
         self.config_file = os.path.join(config_dir, f"{self.name}.conf")  # 配置文件路径
@@ -515,13 +517,13 @@ class LISPNode(Node):
 class ClientNode(Node):
     """端侧节点类，继承自Node类，表示用户设备"""
 
-    def __init__(self, name, ip_allocator, group_label, networks):
-        super().__init__(name, ip_allocator, group_label, networks)  # 调用基类的构造函数
+    def __init__(self, name, ip_allocator, group_label, networks, output_dir=None):
+        super().__init__(name, ip_allocator, group_label, networks, output_dir=output_dir)  # 调用基类的构造函数
         self.node_type = "Client"
         self.default_ip = None
 
     def start(self):
-        mapping_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../output/forward_targets.json')
+        mapping_path = str(self.output_dir / "forward_targets.json")
         self.container = self.client.containers.run(
             "aio",
             name=self.name,

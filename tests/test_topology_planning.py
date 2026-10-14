@@ -2,8 +2,10 @@ import random
 
 import pytest
 
+from app.mq_api_handler import NetworkAPIHandler
 from src.network_simulation import NetworkSimulation
 from src.nodes import Node
+from src.paths import get_config_dir, get_output_dir
 from src.topology import circle_router_topology, grid_router_topology, random_router_topology
 
 
@@ -107,6 +109,53 @@ def test_network_simulation_uses_injected_network_backend_for_topology_state():
         ("node_3", "node_4"),
     ]
     assert {node.name for node in simulation.nodes} == {"node_1", "node_2", "node_3", "node_4"}
+
+
+def test_network_simulation_uses_configured_output_directory(tmp_path):
+    output_dir = tmp_path / "generated"
+    simulation = NetworkSimulation(docker_backend=MemoryNetworkBackend(), output_dir=output_dir)
+
+    simulation.create_grid_nodes(1, 2)
+
+    assert simulation.output_dir == output_dir.resolve()
+    assert {node.output_dir for node in simulation.nodes} == {output_dir.resolve()}
+
+
+def test_cleanup_config_files_uses_configured_output_directory(tmp_path):
+    simulation = NetworkSimulation(docker_backend=MemoryNetworkBackend(), output_dir=tmp_path)
+    conf_file = tmp_path / "node.conf"
+    log_file = tmp_path / "node.log"
+    keep_file = tmp_path / "keep.json"
+    conf_file.write_text("conf", encoding="utf-8")
+    log_file.write_text("log", encoding="utf-8")
+    keep_file.write_text("{}", encoding="utf-8")
+
+    simulation.cleanup_config_files()
+
+    assert not conf_file.exists()
+    assert not log_file.exists()
+    assert keep_file.exists()
+
+
+def test_network_api_handler_writes_mapping_to_configured_output_dir(tmp_path):
+    handler = NetworkAPIHandler(output_dir=tmp_path)
+
+    handler.create_mapping([{"ExternalIP": "192.0.2.10", "SimIP": "10.0.0.2"}])
+
+    assert (tmp_path / "forward_targets.json").read_text(encoding="utf-8") == (
+        '{"forward_targets": [{"source": "192.0.2.10", "destination": "10.0.0.2"}]}'
+    )
+
+
+def test_path_helpers_accept_environment_overrides(tmp_path, monkeypatch):
+    output_dir = tmp_path / "out"
+    config_dir = tmp_path / "cfg"
+    config_dir.mkdir()
+    monkeypatch.setenv("ROUTING_SIM_OUTPUT_DIR", str(output_dir))
+    monkeypatch.setenv("ROUTING_SIM_CONFIG_DIR", str(config_dir))
+
+    assert get_output_dir() == output_dir.resolve()
+    assert get_config_dir() == config_dir.resolve()
 
 
 def test_apply_tc_delay_rejects_invalid_parameters_before_container_access():
