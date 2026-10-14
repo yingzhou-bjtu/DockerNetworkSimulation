@@ -115,7 +115,9 @@ open network connections. The TOML-defined service path uses
 that same service config, and the JSON-defined joint MQ path uses
 `JointRabbitMQConfig`. Connection fields such as hosts, exchanges, and queue
 names are validated at the typed configuration boundary so empty values fail
-before the service attempts a RabbitMQ connection.
+before the service attempts a RabbitMQ connection. Flask service settings are
+validated through `FlaskConfig`, so invalid ports, empty hosts, or non-boolean
+debug values fail before the API thread is launched.
 
 Topology planning is kept in `src/topology.py`, while Docker network creation
 is isolated behind `src/docker_backend.py`. Unit tests can exercise topology

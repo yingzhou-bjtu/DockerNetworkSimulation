@@ -1,8 +1,9 @@
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 
-from .rabbitmq_config import StandardRabbitMQConfig
+from .rabbitmq_config import StandardRabbitMQConfig, require_non_empty_string
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -10,6 +11,42 @@ DEFAULT_API_CONFIG = PROJECT_ROOT / 'configs' / 'api_config.toml'
 DEFAULT_MQ_CONFIG = PROJECT_ROOT / 'configs' / 'mq_config.json'
 API_CONFIG_ENV = 'ROUTING_SIM_API_CONFIG'
 MQ_CONFIG_ENV = 'ROUTING_SIM_MQ_CONFIG'
+
+
+def require_port(field_name, value):
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise TypeError(f'{field_name} must be an integer')
+    if value < 1 or value > 65535:
+        raise ValueError(f'{field_name} must be in 1..65535')
+    return value
+
+
+@dataclass(frozen=True)
+class FlaskConfig:
+    host: str = '0.0.0.0'
+    port: int = 5000
+    debug: bool = False
+
+    def __post_init__(self):
+        require_non_empty_string('host', self.host)
+        require_port('port', self.port)
+        if not isinstance(self.debug, bool):
+            raise TypeError('debug must be a boolean')
+
+    @classmethod
+    def from_mapping(cls, config):
+        return cls(
+            host=config.get('host', cls.host),
+            port=config.get('port', cls.port),
+            debug=config.get('debug', cls.debug),
+        )
+
+    def as_flask_kwargs(self):
+        return {
+            'host': self.host,
+            'port': self.port,
+            'debug': self.debug,
+        }
 
 
 def resolve_config_path(config_file=None, *, env_var=None, default_path=None):
@@ -47,12 +84,10 @@ class ConfigLoader:
         self.config = toml.load(self.config_path)
 
     def get_flask_config(self):
-        flask_config = self.config.get('flask', {})
-        return {
-            "host": flask_config.get('host', '0.0.0.0'),
-            "port": flask_config.get('port', 5000),
-            "debug": flask_config.get('debug', False)
-        }
+        return self.get_typed_flask_config().as_flask_kwargs()
+
+    def get_typed_flask_config(self):
+        return FlaskConfig.from_mapping(self.config.get('flask', {}))
 
     def get_rabbitmq_config(self):
         rabbitmq_config = self.config.get('rabbitmq', {})

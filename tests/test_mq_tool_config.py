@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from app.config_loader import ConfigLoader, load_json_config
+from app.config_loader import ConfigLoader, FlaskConfig, load_json_config
 from app.rabbitmq_config import (
     JointRabbitMQConfig,
     JointRabbitMQQueues,
@@ -25,6 +25,53 @@ def test_config_loader_exposes_typed_standard_rabbitmq_config():
         outbound_queue="bjtu-vire-queue",
         routing_key="",
     )
+
+
+def test_config_loader_validates_flask_config():
+    config_loader = ConfigLoader(Path("configs/api_config.toml"))
+
+    assert config_loader.get_typed_flask_config() == FlaskConfig(
+        host="0.0.0.0",
+        port=5000,
+        debug=False,
+    )
+    assert config_loader.get_flask_config() == {
+        "host": "0.0.0.0",
+        "port": 5000,
+        "debug": False,
+    }
+
+
+def test_config_loader_rejects_invalid_flask_config(tmp_path):
+    bad_port_config = tmp_path / "bad_port.toml"
+    bad_port_config.write_text(
+        "\n".join(
+            [
+                "[flask]",
+                'host = "0.0.0.0"',
+                "port = 70000",
+                "debug = false",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="port"):
+        ConfigLoader(bad_port_config).get_typed_flask_config()
+
+    bad_debug_config = tmp_path / "bad_debug.toml"
+    bad_debug_config.write_text(
+        "\n".join(
+            [
+                "[flask]",
+                'host = "0.0.0.0"',
+                "port = 5000",
+                'debug = "yes"',
+            ]
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(TypeError, match="debug"):
+        ConfigLoader(bad_debug_config).get_typed_flask_config()
 
 
 def test_load_vire_client_config_uses_toml_rabbitmq_section():
