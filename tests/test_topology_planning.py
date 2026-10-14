@@ -175,6 +175,22 @@ def test_path_helpers_accept_environment_overrides(tmp_path, monkeypatch):
     assert get_config_dir() == config_dir.resolve()
 
 
+def test_path_helpers_treat_empty_environment_overrides_as_unset(monkeypatch):
+    monkeypatch.setenv("ROUTING_SIM_OUTPUT_DIR", "")
+    monkeypatch.setenv("ROUTING_SIM_CONFIG_DIR", "")
+
+    assert get_output_dir(create=False).name == "output"
+    assert get_config_dir().name == "configs"
+
+
+def test_path_helpers_reject_explicit_empty_paths():
+    with pytest.raises(ValueError, match="empty"):
+        get_output_dir("", create=False)
+
+    with pytest.raises(ValueError, match="empty"):
+        get_config_dir("")
+
+
 def test_apply_tc_delay_rejects_invalid_parameters_before_container_access():
     node = Node("node_1", ip_allocator=None, group_label="test", networks={})
 

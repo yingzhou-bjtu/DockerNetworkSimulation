@@ -145,6 +145,8 @@ Generated topology, LISP, and forwarding artifacts default to `output/`.
 Override them with `ROUTING_SIM_OUTPUT_DIR` or the `NetworkSimulation` /
 `NetworkAPIHandler` `output_dir` argument. The macvlan config directory
 defaults to `configs/` and can be overridden with `ROUTING_SIM_CONFIG_DIR`.
+Empty environment-variable overrides are treated as unset and fall back to the
+defaults; explicit empty path arguments are rejected.
 
 Do not commit machine-specific hostnames, credentials, or private network
 addresses. Use local environment variables or ignored local config copies for

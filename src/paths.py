@@ -10,11 +10,14 @@ CONFIG_DIR_ENV = "ROUTING_SIM_CONFIG_DIR"
 def resolve_project_path(value=None, *, env_var=None, default_relative=None):
     configured_value = value
     if configured_value is None and env_var:
-        configured_value = os.environ.get(env_var)
+        configured_value = os.environ.get(env_var) or None
     if configured_value is None:
         if default_relative is None:
             raise ValueError("No path value or default was provided.")
         configured_value = default_relative
+
+    if isinstance(configured_value, str) and not configured_value.strip():
+        raise ValueError("Path value must not be empty.")
 
     path = Path(configured_value).expanduser()
     if not path.is_absolute():
