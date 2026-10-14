@@ -75,6 +75,13 @@ Use a non-default MQ configuration:
 python run.py --config configs/mq_config.json
 ```
 
+Run the Vire/BJTU MQ client against the TOML-defined RabbitMQ endpoint:
+
+```bash
+python mq_tool.py
+ROUTING_SIM_API_CONFIG=configs/api_config.toml python mq_tool.py
+```
+
 Run a local smoke check:
 
 ```bash
@@ -121,7 +128,8 @@ For documentation-only changes:
 
 ```bash
 git diff --check
-python3 -m py_compile run.py quick_test.py quick_clean.py
+python3 -m py_compile run.py quick_test.py quick_clean.py mq_tool.py app/config_loader.py
+python3 -m pytest tests/test_mq_tool_config.py
 ```
 
 For runtime changes, also run the Docker build and the smallest topology smoke

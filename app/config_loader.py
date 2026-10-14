@@ -58,6 +58,7 @@ class ConfigLoader:
             "host": rabbitmq_config.get('host', 'localhost'),
             "exchange_name": rabbitmq_config.get('exchange', {}).get('name', 'default-exchange'),
             "exchange_type": rabbitmq_config.get('exchange', {}).get('type', 'direct'),
+            "request_exchange": rabbitmq_config.get('request_exchange', 'vire-bjtu-exchange'),
             "inbound_queue": rabbitmq_config.get('queues', {}).get('inbound', 'queue1'),
             "outbound_queue": rabbitmq_config.get('queues', {}).get('outbound', 'queue2'),
             "routing_key": rabbitmq_config.get('routing', {}).get('key', '')
