@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 
 from src.network_simulation import NetworkSimulation
 
@@ -17,6 +18,26 @@ def parse_xtr_edge(value):
     if not router or not xtr:
         raise argparse.ArgumentTypeError("router and xTR names must not be empty")
     return [router, xtr]
+
+
+def validate_xtr_edges(args):
+    router_names = {f"node_{index + 1}" for index in range(args.nodes)}
+    xtr_counts = Counter(xtr for _router, xtr in args.xtr_edge)
+    duplicate_xtrs = sorted(xtr for xtr, count in xtr_counts.items() if count > 1)
+    if duplicate_xtrs:
+        raise argparse.ArgumentTypeError(
+            f"--xtr-edge contains duplicate xTR names: {', '.join(duplicate_xtrs)}"
+        )
+
+    for router, xtr in args.xtr_edge:
+        if router not in router_names:
+            raise argparse.ArgumentTypeError(
+                f"--xtr-edge router {router!r} is outside the generated node_1..node_{args.nodes} topology"
+            )
+        if xtr in router_names:
+            raise argparse.ArgumentTypeError(
+                f"--xtr-edge xTR name {xtr!r} conflicts with a generated router name"
+            )
 
 
 def parse_args(argv=None):
@@ -48,6 +69,10 @@ def parse_args(argv=None):
         parser.error("--msmr must be at least 1")
     if args.xtr_edge is None:
         args.xtr_edge = [list(edge) for edge in DEFAULT_XTR_EDGES]
+    try:
+        validate_xtr_edges(args)
+    except argparse.ArgumentTypeError as exc:
+        parser.error(str(exc))
     return args
 
 

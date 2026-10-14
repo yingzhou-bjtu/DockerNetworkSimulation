@@ -88,6 +88,9 @@ python -m scripts.quick_test
 python -m scripts.quick_test --nodes 6 --msmr 2 --xtr-edge node_2:xtr_a
 ```
 
+`--xtr-edge` router names must refer to generated circle-router nodes such as
+`node_1`, while xTR names must be unique and must not collide with router names.
+
 Clean generated containers and networks:
 
 ```bash

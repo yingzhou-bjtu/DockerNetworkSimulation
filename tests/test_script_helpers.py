@@ -101,3 +101,39 @@ def test_quick_test_rejects_too_small_topology() -> None:
         assert exc.code == 2
     else:
         raise AssertionError("expected --nodes 2 to fail")
+
+
+def test_quick_test_rejects_xtr_edge_outside_generated_topology() -> None:
+    try:
+        parse_quick_test_args(["--nodes", "4", "--xtr-edge", "node_5:xtr_a"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("expected out-of-range router reference to fail")
+
+
+def test_quick_test_rejects_duplicate_xtr_names() -> None:
+    try:
+        parse_quick_test_args(
+            [
+                "--nodes",
+                "4",
+                "--xtr-edge",
+                "node_1:xtr_a",
+                "--xtr-edge",
+                "node_2:xtr_a",
+            ]
+        )
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("expected duplicate xTR names to fail")
+
+
+def test_quick_test_rejects_xtr_name_that_collides_with_router() -> None:
+    try:
+        parse_quick_test_args(["--nodes", "4", "--xtr-edge", "node_1:node_2"])
+    except SystemExit as exc:
+        assert exc.code == 2
+    else:
+        raise AssertionError("expected xTR/router name collision to fail")
