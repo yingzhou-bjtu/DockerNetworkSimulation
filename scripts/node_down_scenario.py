@@ -2,7 +2,7 @@ from time import sleep
 from src.network_simulation import NetworkSimulation
 
 def main():
-    """节点故障恢复测试"""
+    """Run the node failure and recovery scenario."""
     ns = NetworkSimulation()
     ns.cleanup()
     ns.create_circle_nodes(5)
@@ -17,10 +17,10 @@ def main():
         ns.ping_all()
         ns.traceroute_all()
         if add == 5:
-            print('停止node_2')
+            print('Stopping node_2')
             node_2.container.stop()
         elif add == 10:
-            print('启动node_2')
+            print('Starting node_2')
             node_2.start()
 
         add += 1

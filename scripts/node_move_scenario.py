@@ -10,13 +10,11 @@ def movement(ns: NetworkSimulation):
     xtr_2.container.stop()
     node_2.container.stop()
 
-    # 创建新网络
-    print('创建新网络')
+    print('Creating a new network')
     new_net_name = ns.create_network()
 
-    # xtr2离开原网络
     ip_xtr2 = ipaddress.ip_address(xtr_2.rloc_ip)
-    print(f'-> old RLOC：{ip_xtr2}')
+    print(f'-> old RLOC: {ip_xtr2}')
     old_net_name = None
     for net_name, subnet in ns.networks.items():
         if ip_xtr2 in subnet:
@@ -25,23 +23,21 @@ def movement(ns: NetworkSimulation):
         return
     xtr_2.disconnect_net(old_net_name)
 
-    # 加入新网络
-    print('-> 为xtr2注册新网络')
+    print('-> registering xtr_2 on the new network')
     xtr_2.assign_ip(new_net_name)
     new_ip_xtr2 = xtr_2.network_ips.get(new_net_name)
     xtr_2.connect_net(new_net_name, new_ip_xtr2)
-    print('-> 为node2注册新网络')
+    print('-> registering node_2 on the new network')
     node_2.assign_ip(new_net_name)
     new_ip_node2 = node_2.network_ips.get(new_net_name)
     node_2.connect_net(new_net_name, new_ip_node2)
 
-    # 修改配置
-    print('-> 更新xtr2配置')
+    print('-> updating xtr_2 config')
     xtr_2.generate_xtr_config_file(rloc_ip=new_ip_xtr2)
 
 
 def main():
-    """将xtr2从node3迁移至node2"""
+    """Move xtr_2 from node_3 to node_2."""
     ns = NetworkSimulation()
     ns.cleanup()
     ns.create_circle_nodes(5)
@@ -57,11 +53,11 @@ def main():
     while True:
         print(f'ENV: {add * 10}s')
         if add == 5:
-            print('启动移动事件')
+            print('Starting mobility event')
             movement(ns)
-            print('移动完毕，待启动')
+            print('Mobility event finished; waiting to restart nodes')
         elif add == 10:
-            print('启动节点')
+            print('Starting moved nodes')
             xtr_2.start()
             node_2.start()
 

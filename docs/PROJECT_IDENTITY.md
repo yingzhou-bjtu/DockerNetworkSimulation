@@ -22,7 +22,7 @@ Python-controlled Docker simulation toolkit for routing topology experiments and
 
 - `README.md`
 - `run.py`
-- `quick_test.py`
+- `scripts/`
 - `src/`
 - `app/`
 - `configs/`

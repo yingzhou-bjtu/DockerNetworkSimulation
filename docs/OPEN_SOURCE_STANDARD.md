@@ -25,7 +25,7 @@ The root `README.md` must answer these questions in the first screen:
 
 ## Directory Contract
 
-Keep runtime code in `src/` and `app/`, configuration in `configs/`, container build files in `docker/`, generated files in `output/`, and smoke checks in root scripts or future `tests/`.
+Keep runtime code in `src/` and `app/`, configuration in `configs/`, container build files in `docker/`, generated files in `output/`, and smoke or scenario helpers in `scripts/`.
 
 Current public layout to preserve:
 
@@ -37,7 +37,8 @@ docker/
 oor-compose/
 images/
 output/
-run.py, quick_test.py, quick_clean.py
+run.py, mq_tool.py
+scripts/
 ```
 
 ## Code and Notebook Contract

@@ -22,8 +22,7 @@ See [docs/PROJECT_IDENTITY.md](docs/PROJECT_IDENTITY.md) for the public name, re
 ```text
 .
 ├── run.py                       # service entry point
-├── quick_test.py                # lightweight simulation smoke check
-├── quick_clean.py               # cleanup helper
+├── scripts/                     # smoke, cleanup, scenario, and conversion helpers
 ├── src/                         # topology and simulation primitives
 ├── app/                         # REST/RabbitMQ APIs and typed runtime config
 ├── configs/                     # API, MQ, macvlan, and static topology config
@@ -85,13 +84,19 @@ ROUTING_SIM_API_CONFIG=configs/api_config.toml python mq_tool.py
 Run a local smoke check:
 
 ```bash
-python quick_test.py
+python -m scripts.quick_test
 ```
 
 Clean generated containers and networks:
 
 ```bash
-python quick_clean.py
+python -m scripts.quick_clean
+```
+
+Convert the bundled Chinese static topology fixture to pinyin:
+
+```bash
+python -m scripts.convert_topology_to_pinyin --input configs/static_topo.json --output configs/static_topo_pinyin.json
 ```
 
 Generated topology and LISP files are written under `output/`.
@@ -139,9 +144,9 @@ For documentation-only changes:
 
 ```bash
 git diff --check
-python3 -m py_compile run.py quick_test.py quick_clean.py mq_tool.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/service_runner.py
+python3 -m py_compile run.py mq_tool.py scripts/*.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/service_runner.py
 python3 -m py_compile src/docker_backend.py src/topology.py src/network_simulation.py src/nodes.py
-python3 -m pytest tests/test_mq_tool_config.py tests/test_topology_planning.py
+python3 -m pytest tests/test_mq_tool_config.py tests/test_topology_planning.py tests/test_script_helpers.py
 ```
 
 For runtime changes, also run the Docker build and the smallest topology smoke

@@ -3,4 +3,5 @@ Flask
 matplotlib
 networkx
 pika
+pypinyin
 toml
