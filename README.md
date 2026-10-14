@@ -109,6 +109,11 @@ open network connections. The TOML-defined service path uses
 that same service config, and the JSON-defined joint MQ path uses
 `JointRabbitMQConfig`.
 
+Topology planning is kept in `src/topology.py`, while Docker network creation
+is isolated behind `src/docker_backend.py`. Unit tests can exercise topology
+state with an injected in-memory network backend, and real container runs only
+touch the Docker SDK when a Docker operation is executed.
+
 Runtime configuration can be supplied with explicit paths or environment
 variables:
 
@@ -135,7 +140,8 @@ For documentation-only changes:
 ```bash
 git diff --check
 python3 -m py_compile run.py quick_test.py quick_clean.py mq_tool.py app/config_loader.py app/rabbitmq_config.py app/app_mq.py app/app_mq_joint.py app/service_runner.py
-python3 -m pytest tests/test_mq_tool_config.py
+python3 -m py_compile src/docker_backend.py src/topology.py src/network_simulation.py src/nodes.py
+python3 -m pytest tests/test_mq_tool_config.py tests/test_topology_planning.py
 ```
 
 For runtime changes, also run the Docker build and the smallest topology smoke

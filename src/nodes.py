@@ -1,13 +1,14 @@
 import math
 import os
 import re
-import docker
+
+from .docker_backend import create_docker_client
 
 
 class Node:
     """通用节点基类，包含IP地址管理和Docker容器的基本操作"""
 
-    def __init__(self, name, ip_allocator, group_label, networks):
+    def __init__(self, name, ip_allocator, group_label, networks, docker_client=None):
         self.name = name
         self.network_ips = {}  # 用于存储每个网络的 IP 地址，network_name-ip
         self.container = None
@@ -15,7 +16,13 @@ class Node:
         self.group_label = group_label
         self.networks = networks
         self.coordinates = {"latitude": 0.0, "longitude": 0.0}
-        self.client = docker.from_env()
+        self._client = docker_client
+
+    @property
+    def client(self):
+        if self._client is None:
+            self._client = create_docker_client()
+        return self._client
 
     def assign_ip(self, network_name):
         """为节点分配指定网络的 IP 地址"""

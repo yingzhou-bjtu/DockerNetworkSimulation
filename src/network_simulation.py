@@ -2,23 +2,27 @@ import glob
 import ipaddress
 import json
 import os
-import random
 from concurrent.futures import ThreadPoolExecutor
 from itertools import combinations
 from time import sleep
 from typing import Optional, Union
 
-import docker
 import networkx as nx
 import matplotlib.pyplot as plt
-from docker.models.networks import Network
 
+from .docker_backend import DockerNetworkBackend
 from .ip_tools import IPAddressAllocator
 from .nodes import RouterNode, LISPNode, ClientNode, FrrOSPFRouterNode, Node
+from .topology import (
+    circle_router_topology,
+    grid_router_topology,
+    random_router_topology,
+    router_node_specs,
+)
 
 
 class NetworkSimulation:
-    def __init__(self):
+    def __init__(self, docker_backend=None, group_label="network_simulation_group"):
         self.nodes = []  # 所有节点
         self.router_nodes = []  # 路由节点
         self.xtr_nodes = []  # xtr节点
@@ -28,25 +32,26 @@ class NetworkSimulation:
         self.base_network = ipaddress.ip_network("10.10.0.0/16")  # 可用的网络范围
         self.subnet_prefixlen = 24  # 子网前缀
         self.graph = nx.Graph()  # networkx图
-        self.client = docker.from_env()  # docker客户端
         self.net_docker_obj = {}  # 所有docker网络对象
         self.networks = {}  # 所有网络
         self.ip_allocator = IPAddressAllocator()  # ip分配工具
         self.is_running = False
-        self.group_label = "network_simulation_group"  # docker标签
+        self.group_label = group_label  # docker标签
+        self.docker_backend = docker_backend or DockerNetworkBackend(group_label=self.group_label)
         self.next_subnet = iter(self.base_network.subnets(new_prefix=self.subnet_prefixlen))  # 子网迭代器
 
     def cleanup(self):
         print('开始清理容器和网络……')
         # 清理容器
-        containers = self.client.containers.list(all=True, filters={"label": f"group={self.group_label}"})
+        containers = self.docker_backend.list_group_containers()
         with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self._stop_and_remove_container, container) for container in containers]
+            futures = [executor.submit(self.docker_backend.stop_and_remove_container, container)
+                       for container in containers]
             for future in futures:
                 future.result()
 
         # 清理网络
-        networks = self.client.networks.list(filters={"label": f"group={self.group_label}"})
+        networks = self.docker_backend.list_group_networks()
         for network in networks:
             try:
                 network.remove()
@@ -58,149 +63,56 @@ class NetworkSimulation:
         self.cleanup_config_files()
         print('全部清理完毕')
 
-    @staticmethod
-    def _stop_and_remove_container(container):
-        """停止并删除单个容器"""
-        try:
-            container.stop()
-            container.remove()
-            print(f'-> 容器{container.name}已停止并删除')
-        except docker.errors.APIError as e:
-            print(f"Failed to stop or remove container {container.name}: {str(e)}")
-
     def create_network(self):
         subnet = next(self.next_subnet)
         net_name = f'bjtu_{subnet}'
-        network = self.client.networks.create(
-            net_name,
-            driver="bridge",
-            labels={"group": self.group_label},  # 添加唯一标签
-            # options={"com.docker.network.bridge.name": f"br-{subnet.network_address}"},  # 主机中网桥名称
-            # options={"com.docker.network.container_iface_prefix": f"RLOC"},  # 容器中网卡名称前缀
-            ipam=docker.types.IPAMConfig(
-                pool_configs=[
-                    docker.types.IPAMPool(
-                        subnet=str(subnet)
-                    )
-                ]
-            )
-        )
-        self.net_docker_obj[net_name] = network
-        self.networks[net_name] = subnet
-        self.ip_allocator.add_network(subnet)
+        network = self.docker_backend.create_bridge_network(net_name, subnet)
+        self.register_network(net_name, subnet, network)
         print(f"-> 网络{subnet}创建成功")
         return net_name
 
     def create_manual_network(self, network_cidr):
         subnet = ipaddress.ip_network(network_cidr)
         net_name = f'bjtu_{subnet}'
-        network = self.client.networks.create(
-            net_name,
-            driver="bridge",
-            labels={"group": self.group_label},  # 添加唯一标签
-            ipam=docker.types.IPAMConfig(
-                pool_configs=[
-                    docker.types.IPAMPool(
-                        subnet=str(subnet)
-                    )
-                ]
-            )
-        )
-        self.net_docker_obj[net_name] = network
-        self.networks[net_name] = subnet
+        network = self.docker_backend.create_bridge_network(net_name, subnet)
+        self.register_network(net_name, subnet, network)
         print(f"-> 网络{subnet}创建成功")
         return net_name
 
     def create_macvlan_network(self, net_name, parent, subnet, gateway):
-        network = self.client.networks.create(
+        subnet = ipaddress.ip_network(subnet)
+        network = self.docker_backend.create_macvlan_network(
             net_name,
-            driver="macvlan",
-            options={"parent": str(parent)},
-            labels={"group": self.group_label},  # 添加唯一标签
-            ipam=docker.types.IPAMConfig(
-                driver="default",
-                pool_configs=[docker.types.IPAMPool(
-                    subnet=str(subnet),
-                    gateway=str(gateway)
-                )]
-            )
+            parent=parent,
+            subnet=subnet,
+            gateway=gateway,
         )
+        self.register_network(net_name, subnet, network)
+        return net_name
+
+    def register_network(self, net_name, subnet, network):
         self.net_docker_obj[net_name] = network
         self.networks[net_name] = subnet
-        return net_name
+        self.ip_allocator.add_network(subnet)
 
     def create_random_nodes(self, count):
         print(f'开始创建{count}个节点的随机拓扑……')
-        nodes = [f"node_{i + 1}" for i in range(count)]
-        edges = set()
-        node_connections = {node: 0 for node in nodes}  # 记录每个节点的连接数
-
-        if count == 1:
-            # 对于单个节点的情况，不生成边，直接返回单节点拓扑
-            self.create_custom_topology(nodes, list(edges))
-            return
-
-        # 生成随机边
-        max_conn = 2 if count >= 3 else count
-        for node in nodes:
-            possible_connections = random.sample(nodes, k=random.randint(1, max_conn))
-            for target_node in possible_connections:
-                if node != target_node:
-                    # 使用排序的元组表示无向边，避免重复
-                    edge = tuple(sorted((node, target_node)))
-                    if edge not in edges:
-                        edges.add(edge)
-                        # 增加每个节点的连接计数
-                        node_connections[node] += 1
-                        node_connections[target_node] += 1
-
-        # 确保每个节点至少有一个连接
-        for node in nodes:
-            if node_connections[node] == 0:
-                # 随机选择一个不同的节点来连接
-                while True:
-                    target_node = random.choice(nodes)
-                    if node != target_node:
-                        edge = tuple(sorted((node, target_node)))
-                        if edge not in edges:
-                            edges.add(edge)
-                            # 更新连接计数
-                            node_connections[node] += 1
-                            node_connections[target_node] += 1
-                            break
-
-        self.create_custom_topology(self.get_nodes_js(nodes), list(edges))
+        nodes, edges = random_router_topology(count)
+        self.create_custom_topology(nodes, edges)
 
     def create_circle_nodes(self, count):
         print(f'开始创建{count}个节点的环形拓扑……')
-        nodes = [f"node_{i + 1}" for i in range(count)]
-        edges = []
-        # 生成环形边
-        for i in range(count):
-            edges.append([nodes[i], nodes[(i + 1) % count]])
-        self.create_custom_topology(self.get_nodes_js(nodes), list(edges))
+        nodes, edges = circle_router_topology(count)
+        self.create_custom_topology(nodes, edges)
 
     def create_grid_nodes(self, rows, cols):
         print(f'开始创建{rows}行{cols}列的网格拓扑……')
-        nodes = [f"node_{i * cols + j + 1}" for i in range(rows) for j in range(cols)]
-        edges = []
-        # 生成网格边
-        for i in range(rows):
-            for j in range(cols):
-                node_index = i * cols + j
-                if j < cols - 1:  # 水平边（右）
-                    edges.append([nodes[node_index], nodes[node_index + 1]])
-                if i < rows - 1:  # 垂直边（下）
-                    edges.append([nodes[node_index], nodes[node_index + cols]])
-        self.create_custom_topology(self.get_nodes_js(nodes), list(edges))
+        nodes, edges = grid_router_topology(rows, cols)
+        self.create_custom_topology(nodes, edges)
 
     @staticmethod
     def get_nodes_js(nodes):
-        nodes_js = []
-        for node in nodes:
-            nodes_js.append({"name": node, "type": "Router", "coordinates": {"latitude": 0.0, "longitude": 0.0}})
-        return nodes_js
-
+        return router_node_specs(nodes)
 
     def create_custom_topology(self, nodes: list, edges: list):
         """
