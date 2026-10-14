@@ -113,7 +113,9 @@ RabbitMQ settings are normalized in `app/rabbitmq_config.py` before handlers
 open network connections. The TOML-defined service path uses
 `StandardRabbitMQConfig`, the Vire/BJTU client derives `VireClientConfig` from
 that same service config, and the JSON-defined joint MQ path uses
-`JointRabbitMQConfig`.
+`JointRabbitMQConfig`. Connection fields such as hosts, exchanges, and queue
+names are validated at the typed configuration boundary so empty values fail
+before the service attempts a RabbitMQ connection.
 
 Topology planning is kept in `src/topology.py`, while Docker network creation
 is isolated behind `src/docker_backend.py`. Unit tests can exercise topology

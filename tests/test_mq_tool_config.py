@@ -1,8 +1,11 @@
 from pathlib import Path
 
+import pytest
+
 from app.config_loader import ConfigLoader, load_json_config
 from app.rabbitmq_config import (
     JointRabbitMQConfig,
+    JointRabbitMQQueues,
     StandardRabbitMQConfig,
     ensure_joint_rabbitmq_config,
     ensure_standard_rabbitmq_config,
@@ -58,3 +61,28 @@ def test_rabbitmq_config_compatibility_converters_accept_existing_instances():
 
     assert ensure_standard_rabbitmq_config(standard_config) is standard_config
     assert ensure_joint_rabbitmq_config(joint_config) is joint_config
+
+
+def test_rabbitmq_config_rejects_empty_connection_fields():
+    with pytest.raises(ValueError, match="host"):
+        StandardRabbitMQConfig(host=" ")
+
+    with pytest.raises(ValueError, match="topo_queue"):
+        JointRabbitMQQueues(
+            control_queue_gr="control",
+            nodeinfo_queue="nodeinfo",
+            topo_queue="",
+            map_queue="map",
+        )
+
+
+def test_joint_rabbitmq_config_rejects_untyped_queue_mapping():
+    with pytest.raises(TypeError, match="JointRabbitMQQueues"):
+        JointRabbitMQConfig(
+            host="localhost",
+            username="guest",
+            password="guest",
+            exchange="exchange",
+            exchange_type="direct",
+            queues={"control_queue_gr": "control"},
+        )

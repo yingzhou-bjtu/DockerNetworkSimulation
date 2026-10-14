@@ -1,6 +1,20 @@
 from dataclasses import dataclass
 
 
+def require_non_empty_string(field_name, value):
+    if not isinstance(value, str):
+        raise TypeError(f'{field_name} must be a string')
+    if not value.strip():
+        raise ValueError(f'{field_name} must not be empty')
+    return value
+
+
+def require_string(field_name, value):
+    if not isinstance(value, str):
+        raise TypeError(f'{field_name} must be a string')
+    return value
+
+
 @dataclass(frozen=True)
 class StandardRabbitMQConfig:
     host: str = 'localhost'
@@ -10,6 +24,15 @@ class StandardRabbitMQConfig:
     inbound_queue: str = 'queue1'
     outbound_queue: str = 'queue2'
     routing_key: str = ''
+
+    def __post_init__(self):
+        require_non_empty_string('host', self.host)
+        require_non_empty_string('exchange_name', self.exchange_name)
+        require_non_empty_string('exchange_type', self.exchange_type)
+        require_non_empty_string('request_exchange', self.request_exchange)
+        require_non_empty_string('inbound_queue', self.inbound_queue)
+        require_non_empty_string('outbound_queue', self.outbound_queue)
+        require_string('routing_key', self.routing_key)
 
     @classmethod
     def from_mapping(cls, config):
@@ -34,6 +57,15 @@ class VireClientConfig:
     response_queue: str = 'bjtu-vire-queue'
     routing_key: str = ''
 
+    def __post_init__(self):
+        require_non_empty_string('host', self.host)
+        require_non_empty_string('exchange_type', self.exchange_type)
+        require_non_empty_string('request_exchange', self.request_exchange)
+        require_non_empty_string('response_exchange', self.response_exchange)
+        require_non_empty_string('request_queue', self.request_queue)
+        require_non_empty_string('response_queue', self.response_queue)
+        require_string('routing_key', self.routing_key)
+
     @classmethod
     def from_standard_config(cls, config):
         standard_config = ensure_standard_rabbitmq_config(config)
@@ -54,6 +86,12 @@ class JointRabbitMQQueues:
     nodeinfo_queue: str
     topo_queue: str
     map_queue: str
+
+    def __post_init__(self):
+        require_non_empty_string('control_queue_gr', self.control_queue_gr)
+        require_non_empty_string('nodeinfo_queue', self.nodeinfo_queue)
+        require_non_empty_string('topo_queue', self.topo_queue)
+        require_non_empty_string('map_queue', self.map_queue)
 
     @classmethod
     def from_mapping(cls, queues):
@@ -81,6 +119,15 @@ class JointRabbitMQConfig:
     exchange: str
     exchange_type: str
     queues: JointRabbitMQQueues
+
+    def __post_init__(self):
+        require_non_empty_string('host', self.host)
+        require_non_empty_string('username', self.username)
+        require_non_empty_string('password', self.password)
+        require_non_empty_string('exchange', self.exchange)
+        require_non_empty_string('exchange_type', self.exchange_type)
+        if not isinstance(self.queues, JointRabbitMQQueues):
+            raise TypeError('queues must be a JointRabbitMQQueues instance')
 
     @classmethod
     def from_mapping(cls, config):
