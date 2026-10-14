@@ -1,6 +1,9 @@
 import random
 
+import pytest
+
 from src.network_simulation import NetworkSimulation
+from src.nodes import Node
 from src.topology import circle_router_topology, grid_router_topology, random_router_topology
 
 
@@ -104,3 +107,38 @@ def test_network_simulation_uses_injected_network_backend_for_topology_state():
         ("node_3", "node_4"),
     ]
     assert {node.name for node in simulation.nodes} == {"node_1", "node_2", "node_3", "node_4"}
+
+
+def test_apply_tc_delay_rejects_invalid_parameters_before_container_access():
+    node = Node("node_1", ip_allocator=None, group_label="test", networks={})
+
+    invalid_parameters = [
+        {"delay": 100},
+        {"jitter": 10},
+        {"loss": -1.0},
+        {"loss": 101.0},
+        {"loss": 1},
+        {"max_queue_size": 0},
+        {"max_queue_size": 1.5},
+    ]
+
+    for parameters in invalid_parameters:
+        with pytest.raises(ValueError):
+            node.apply_tc_delay("eth0", **parameters)
+
+
+def test_apply_tc_on_edges_rejects_unknown_topology_edges():
+    simulation = NetworkSimulation(docker_backend=MemoryNetworkBackend())
+    simulation.create_grid_nodes(1, 2)
+
+    with pytest.raises(ValueError, match="不在图中"):
+        simulation.apply_tc_on_edges([("node_2", "node_3")])
+
+
+def test_apply_tc_on_edges_rejects_missing_nodes():
+    simulation = NetworkSimulation(docker_backend=MemoryNetworkBackend())
+    simulation.create_grid_nodes(1, 2)
+    simulation.nodes.clear()
+
+    with pytest.raises(ValueError, match="不存在"):
+        simulation.apply_tc_on_edges([("node_1", "node_2")])

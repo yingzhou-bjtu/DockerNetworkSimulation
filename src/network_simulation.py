@@ -578,14 +578,17 @@ class NetworkSimulation:
         """
         print('正在应用tc规则……')
         for edge in edges:
-            assert edge in self.graph.edges, f"边 {edge} 不在图中"
+            if edge not in self.graph.edges:
+                raise ValueError(f"边 {edge} 不在图中")
             network_name = self.graph.edges[edge]['network']
 
             for node_name in edge:
                 node: RouterNode = self.get_node_by_name(node_name)
-                assert node, f"节点 {node_name} 不存在"
+                if node is None:
+                    raise ValueError(f"节点 {node_name} 不存在")
                 interface = node.get_interface_by_network(str(self.networks[network_name]))
-                assert interface, f"节点 {node_name} 没有找到网络 {network_name} 的接口"
+                if not interface:
+                    raise ValueError(f"节点 {node_name} 没有找到网络 {network_name} 的接口")
                 node.apply_tc_delay(interface=interface,
                                     delay=delay, jitter=jitter, loss=loss, max_queue_size=max_queue_size)
         print('应用tc规则完毕')

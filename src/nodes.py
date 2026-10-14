@@ -213,13 +213,14 @@ class Node:
         - loss: 丢包率（例如 0.1 表示 0.1% 的丢包率）
         - max_queue_size: 最大队列长度（例如 1000）
         """
-        assert delay is None or isinstance(delay, str), f"无效的 delay 参数: {delay}, 需要是字符串"
-        assert jitter is None or isinstance(jitter, str), f"无效的 jitter 参数: {jitter}, 需要是字符串"
-        assert (loss is None or
-                (isinstance(loss, float) and 0 <= loss <= 100)), f"无效的丢包率: {loss}, 必须是 0 到 100 之间的浮点数"
-        assert (max_queue_size is None or
-                (isinstance(max_queue_size,
-                            int) and max_queue_size > 0)), f"无效的队列大小: {max_queue_size}, 必须是正整数"
+        if delay is not None and not isinstance(delay, str):
+            raise ValueError(f"无效的 delay 参数: {delay}, 需要是字符串")
+        if jitter is not None and not isinstance(jitter, str):
+            raise ValueError(f"无效的 jitter 参数: {jitter}, 需要是字符串")
+        if loss is not None and (not isinstance(loss, float) or not 0 <= loss <= 100):
+            raise ValueError(f"无效的丢包率: {loss}, 必须是 0 到 100 之间的浮点数")
+        if max_queue_size is not None and (not isinstance(max_queue_size, int) or max_queue_size <= 0):
+            raise ValueError(f"无效的队列大小: {max_queue_size}, 必须是正整数")
 
         # 构建 tc netem 命令的参数部分
         netem_args = []
