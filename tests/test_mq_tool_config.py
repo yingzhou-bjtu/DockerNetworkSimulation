@@ -18,13 +18,23 @@ def test_simulation_request_normalizes_static_topology():
     request = parse_simulation_request(
         {
             "topology_type": "static",
-            "static_topology": {"nodes": ["node_1"], "edges": []},
+            "static_topology": {
+                "nodes": [
+                    {
+                        "name": "node_1",
+                        "type": "router",
+                        "coordinates": {"latitude": 1.0, "longitude": 2.0},
+                    }
+                ],
+                "edges": [],
+            },
             "use_static_routes": True,
         }
     )
 
     assert request.topology_type == "static"
-    assert request.static_topology == {"nodes": ["node_1"], "edges": []}
+    assert request.static_topology["nodes"][0]["name"] == "node_1"
+    assert request.static_topology["edges"] == []
     assert request.use_static_routes is True
 
 
@@ -57,6 +67,28 @@ def test_simulation_request_rejects_invalid_lisp_counts():
                 "ms_count": 0,
             }
         )
+
+
+def test_simulation_request_validates_static_topology_graph():
+    valid_node = {
+        "name": "node_1",
+        "coordinates": {"latitude": 1.0, "longitude": 2.0},
+    }
+    cases = (
+        ({"nodes": [], "edges": []}, "non-empty list"),
+        ({"nodes": ["bad"], "edges": []}, "must be an object"),
+        ({"nodes": [{"name": "", "coordinates": {}}], "edges": []}, "non-empty string"),
+        ({"nodes": [{**valid_node, "coordinates": None}], "edges": []}, "coordinates"),
+        ({"nodes": [valid_node, valid_node], "edges": []}, "duplicate"),
+        ({"nodes": [valid_node], "edges": [["node_1"]]}, "two node names"),
+        ({"nodes": [valid_node], "edges": [["node_1", "node_1"]]}, "self-loop"),
+        ({"nodes": [valid_node], "edges": [["node_1", "missing"]]}, "unknown nodes"),
+    )
+    for topology, message in cases:
+        with pytest.raises(ValueError, match=message):
+            parse_simulation_request(
+                {"topology_type": "static", "static_topology": topology}
+            )
 
 
 def test_config_loader_exposes_typed_standard_rabbitmq_config():

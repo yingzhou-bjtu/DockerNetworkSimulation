@@ -8,6 +8,7 @@ service keeps its separate topology/config protocol.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping
 
 
 TOPOLOGY_TYPES = ('static', 'random')
@@ -39,6 +40,7 @@ def parse_simulation_request(data):
         static_topology = data.get('static_topology')
         if not isinstance(static_topology, dict):
             raise ValueError('static topology requires a static_topology object')
+        static_topology = validate_static_topology(static_topology)
     else:
         node_count = data.get('node_count')
         if isinstance(node_count, bool) or not isinstance(node_count, int) or node_count < 1:
@@ -71,3 +73,57 @@ def parse_simulation_request(data):
         ms_count=ms_count,
         use_static_routes=use_static_routes,
     )
+
+
+def validate_static_topology(topology: Mapping) -> dict:
+    nodes = topology.get('nodes')
+    edges = topology.get('edges')
+    if not isinstance(nodes, list) or not nodes:
+        raise ValueError("static_topology.nodes must be a non-empty list")
+    if not isinstance(edges, list):
+        raise ValueError("static_topology.edges must be a list")
+
+    node_names: set[str] = set()
+    normalized_nodes = []
+    for index, node in enumerate(nodes):
+        if not isinstance(node, Mapping):
+            raise ValueError(f"static_topology.nodes[{index}] must be an object")
+        name = node.get('name')
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(
+                f"static_topology.nodes[{index}].name must be a non-empty string"
+            )
+        if name in node_names:
+            raise ValueError(f"duplicate static topology node name: {name}")
+        coordinates = node.get('coordinates')
+        if not isinstance(coordinates, Mapping):
+            raise ValueError(
+                f"static_topology.nodes[{index}].coordinates must be an object"
+            )
+        node_names.add(name)
+        normalized_nodes.append(dict(node))
+
+    normalized_edges = []
+    for index, edge in enumerate(edges):
+        if not isinstance(edge, (list, tuple)) or len(edge) != 2:
+            raise ValueError(
+                f"static_topology.edges[{index}] must contain two node names"
+            )
+        source, target = edge
+        if not isinstance(source, str) or not isinstance(target, str):
+            raise ValueError(
+                f"static_topology.edges[{index}] endpoints must be strings"
+            )
+        if source == target:
+            raise ValueError(
+                f"static_topology.edges[{index}] must not be a self-loop"
+            )
+        unknown = {source, target} - node_names
+        if unknown:
+            raise ValueError(
+                f"static_topology.edges[{index}] references unknown nodes: "
+                + ", ".join(sorted(unknown))
+            )
+        normalized_edges.append([source, target])
+
+    return {'nodes': normalized_nodes, 'edges': normalized_edges}

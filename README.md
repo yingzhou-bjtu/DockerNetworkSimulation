@@ -135,6 +135,9 @@ touch the Docker SDK when a Docker operation is executed. Topology planners
 validate dimensions before allocating Docker resources: random topologies need
 a positive node count, circle topologies need at least three nodes, and grid
 topologies need positive row and column counts.
+Static API requests require non-empty node objects with non-empty names and
+coordinate mappings; edges must reference two distinct known node names. The
+graph is validated before Docker orchestration begins.
 
 Runtime configuration can be supplied with explicit paths or environment
 variables:
