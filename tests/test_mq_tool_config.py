@@ -11,6 +11,52 @@ from app.rabbitmq_config import (
     ensure_standard_rabbitmq_config,
 )
 from mq_tool import VireClientConfig, load_vire_client_config
+from app.simulation_request import parse_simulation_request
+
+
+def test_simulation_request_normalizes_static_topology():
+    request = parse_simulation_request(
+        {
+            "topology_type": "static",
+            "static_topology": {"nodes": ["node_1"], "edges": []},
+            "use_static_routes": True,
+        }
+    )
+
+    assert request.topology_type == "static"
+    assert request.static_topology == {"nodes": ["node_1"], "edges": []}
+    assert request.use_static_routes is True
+
+
+def test_simulation_request_normalizes_random_topology():
+    request = parse_simulation_request({"topology_type": "random", "node_count": 4})
+
+    assert request.topology_type == "random"
+    assert request.node_count == 4
+    assert request.lisp_mode == "none"
+
+
+def test_simulation_request_rejects_zero_node_count():
+    with pytest.raises(ValueError, match="node_count"):
+        parse_simulation_request({"topology_type": "random", "node_count": 0})
+
+
+def test_simulation_request_rejects_boolean_node_count():
+    with pytest.raises(ValueError, match="node_count"):
+        parse_simulation_request({"topology_type": "random", "node_count": True})
+
+
+def test_simulation_request_rejects_invalid_lisp_counts():
+    with pytest.raises(ValueError, match="ms_count"):
+        parse_simulation_request(
+            {
+                "topology_type": "random",
+                "node_count": 4,
+                "lisp_mode": "simulation",
+                "xtr_count": 2,
+                "ms_count": 0,
+            }
+        )
 
 
 def test_config_loader_exposes_typed_standard_rabbitmq_config():

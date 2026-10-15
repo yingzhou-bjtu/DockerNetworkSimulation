@@ -1,5 +1,6 @@
 import threading
 
+from .simulation_request import parse_simulation_request
 from src.network_simulation import NetworkSimulation
 
 
@@ -21,61 +22,42 @@ class NetworkAPIHandler:
             if self.is_starting or self.is_started:
                 return {"state": 0, "msg": '环境已启动或在启动中，请勿重复启动'}
 
-            print(data)
-            topology_type = data.get('topology_type')  # 'static' 或 'random'
-            static_topology = data.get('static_topology') if topology_type == 'static' else None
-            node_count = data.get('node_count') if topology_type == 'random' else None
-            lisp_mode = data.get('lisp_mode', 'none')  # 'simulation' 或 'real' 或 'none'
-            xtr_count = data.get('xtr_count') if lisp_mode == 'simulation' else None
-            ms_count = data.get('ms_count') if lisp_mode == 'simulation' else None
-            use_static_routes = data.get('use_static_routes', False)
-
-            # 参数验证
-            if topology_type not in ['static', 'random']:
-                return {"state": 0, "msg": "必须指定有效的拓扑类型：'static' 或 'random'"}
-            if topology_type == 'static' and not static_topology:
-                return {"state": 0, "msg": "静态拓扑需要提供拓扑配置"}
-            if topology_type == 'random' and not node_count:
-                return {"state": 0, "msg": "随机拓扑需要提供节点数量"}
-            if lisp_mode == 'simulation' and (xtr_count is None or ms_count is None):
-                return {"state": 0, "msg": "启用LISP模拟模式时必须提供xTR和MS的数量"}
-            if use_static_routes and not topology_type:
-                return {"state": 0, "msg": "必须在启用拓扑后才能启用静态路由"}
+            request = parse_simulation_request(data)
 
             if use_thread:
                 thread = threading.Thread(target=self.start_in_thread,
-                                          args=(topology_type, static_topology, node_count,
-                                                lisp_mode, xtr_count, ms_count, use_static_routes))
+                                          args=(request,))
                 thread.start()
-                return {
-                    "state": 1,
-                    "msg": "开始启动环境"
-                }
+                return {"state": 1, "msg": "开始启动环境"}
             else:
-                self.start_in_thread(topology_type, static_topology, node_count,
-                                     lisp_mode, xtr_count, ms_count, use_static_routes)
+                self.start_in_thread(request)
                 return self.get_status()
+        except ValueError as exc:
+            return {"state": 0, "msg": f"请求参数错误：{exc}"}
         except RuntimeError as e:
             return {"state": 0, "msg": f"错误详情：{e}"}
 
-    def start_in_thread(self, topology_type, static_topology, node_count,
-                        lisp_mode, xtr_count, ms_count, use_static_routes):
+    def start_in_thread(self, request):
         self.is_starting = True
         self.ns.cleanup()
 
-        if topology_type == 'static':  # 使用静态拓扑
-            self.ns.create_custom_topology(nodes=static_topology['nodes'], edges=static_topology['edges'])
-        elif topology_type == 'random':  # 使用随机拓扑
-            self.ns.create_random_nodes(node_count)
-        if lisp_mode == 'simulation':  # 使用模拟LISP节点，包含客户端
-            self.ns.create_lisp_topology(num_xtr=xtr_count, num_msmr=ms_count)
-        elif lisp_mode == 'real':  # 使用macvlan模式LISP节点
+        if request.topology_type == 'static':
+            self.ns.create_custom_topology(
+                nodes=request.static_topology['nodes'],
+                edges=request.static_topology['edges'],
+            )
+        else:
+            self.ns.create_random_nodes(request.node_count)
+
+        if request.lisp_mode == 'simulation':
+            self.ns.create_lisp_topology(num_xtr=request.xtr_count, num_msmr=request.ms_count)
+        elif request.lisp_mode == 'real':
             self.ns.create_lisp_macvlan(num_msmr=1)
 
         self.ns.display_network_topology()
         self.ns.start_simulation()
 
-        if use_static_routes:  # 使用静态路由
+        if request.use_static_routes:
             self.ns.create_static_routes()
 
         self.is_started = True
