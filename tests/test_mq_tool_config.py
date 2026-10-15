@@ -120,6 +120,31 @@ def test_config_loader_rejects_invalid_flask_config(tmp_path):
         ConfigLoader(bad_debug_config).get_typed_flask_config()
 
 
+def test_config_loader_rejects_non_mapping_sections(tmp_path):
+    cases = {
+        "flask": '\n'.join(['flask = "bad"']),
+        "rabbitmq": '\n'.join(['rabbitmq = "bad"']),
+        "rabbitmq.exchange": '\n'.join(['[rabbitmq]', 'exchange = "bad"']),
+        "rabbitmq.queues": '\n'.join(['[rabbitmq]', 'queues = ["bad"]']),
+        "rabbitmq.routing": '\n'.join(['[rabbitmq]', 'routing = 1']),
+        "app": '\n'.join(['app = ["bad"]']),
+    }
+    for name, text in cases.items():
+        config_path = tmp_path / f"{name.replace('.', '_')}.toml"
+        config_path.write_text(text, encoding="utf-8")
+        loader = ConfigLoader(config_path)
+
+        with pytest.raises(TypeError, match=name):
+            if name == "flask":
+                loader.get_typed_flask_config()
+            elif name == "rabbitmq":
+                loader.get_rabbitmq_config()
+            elif name.startswith("rabbitmq."):
+                loader.get_rabbitmq_config()
+            else:
+                loader.get_api_type()
+
+
 def test_load_vire_client_config_uses_toml_rabbitmq_section():
     config = load_vire_client_config(Path("configs/api_config.toml"))
 

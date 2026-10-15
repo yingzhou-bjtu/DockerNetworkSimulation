@@ -123,6 +123,10 @@ names are validated at the typed configuration boundary so empty values fail
 before the service attempts a RabbitMQ connection. Flask service settings are
 validated through `FlaskConfig`, so invalid ports, empty hosts, or non-boolean
 debug values fail before the API thread is launched.
+The loader also requires `flask`, `rabbitmq`, `rabbitmq.exchange`,
+`rabbitmq.queues`, `rabbitmq.routing`, and `app` to be TOML tables; scalar or
+array values fail with a field-specific error instead of becoming
+`AttributeError`s during startup.
 
 Topology planning is kept in `src/topology.py`, while Docker network creation
 is isolated behind `src/docker_backend.py`. Unit tests can exercise topology

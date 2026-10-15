@@ -1,5 +1,6 @@
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,12 @@ def require_port(field_name, value):
         raise TypeError(f'{field_name} must be an integer')
     if value < 1 or value > 65535:
         raise ValueError(f'{field_name} must be in 1..65535')
+    return value
+
+
+def require_mapping(field_name, value):
+    if not isinstance(value, Mapping):
+        raise TypeError(f'{field_name} must be a mapping/table')
     return value
 
 
@@ -87,22 +94,39 @@ class ConfigLoader:
         return self.get_typed_flask_config().as_flask_kwargs()
 
     def get_typed_flask_config(self):
-        return FlaskConfig.from_mapping(self.config.get('flask', {}))
+        flask_config = require_mapping('flask', self.config.get('flask', {}))
+        return FlaskConfig.from_mapping(flask_config)
 
     def get_rabbitmq_config(self):
-        rabbitmq_config = self.config.get('rabbitmq', {})
+        rabbitmq_config = require_mapping(
+            'rabbitmq',
+            self.config.get('rabbitmq', {}),
+        )
+        exchange_config = require_mapping(
+            'rabbitmq.exchange',
+            rabbitmq_config.get('exchange', {}),
+        )
+        queue_config = require_mapping(
+            'rabbitmq.queues',
+            rabbitmq_config.get('queues', {}),
+        )
+        routing_config = require_mapping(
+            'rabbitmq.routing',
+            rabbitmq_config.get('routing', {}),
+        )
         return {
             "host": rabbitmq_config.get('host', 'localhost'),
-            "exchange_name": rabbitmq_config.get('exchange', {}).get('name', 'default-exchange'),
-            "exchange_type": rabbitmq_config.get('exchange', {}).get('type', 'direct'),
+            "exchange_name": exchange_config.get('name', 'default-exchange'),
+            "exchange_type": exchange_config.get('type', 'direct'),
             "request_exchange": rabbitmq_config.get('request_exchange', 'vire-bjtu-exchange'),
-            "inbound_queue": rabbitmq_config.get('queues', {}).get('inbound', 'queue1'),
-            "outbound_queue": rabbitmq_config.get('queues', {}).get('outbound', 'queue2'),
-            "routing_key": rabbitmq_config.get('routing', {}).get('key', '')
+            "inbound_queue": queue_config.get('inbound', 'queue1'),
+            "outbound_queue": queue_config.get('outbound', 'queue2'),
+            "routing_key": routing_config.get('key', '')
         }
 
     def get_standard_rabbitmq_config(self):
         return StandardRabbitMQConfig.from_mapping(self.get_rabbitmq_config())
 
     def get_api_type(self):
-        return self.config.get('app', {}).get('api_type', ['flask'])
+        app_config = require_mapping('app', self.config.get('app', {}))
+        return app_config.get('api_type', ['flask'])
