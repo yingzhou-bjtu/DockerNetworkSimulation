@@ -122,8 +122,6 @@ class NetworkAPIHandler:
             delay = data.get('delay')
             jitter = data.get('jitter')
             loss = data.get('loss')
-            print(loss)
-            print(type(loss))
             max_queue_size = data.get('max_queue_size')
             self.ns.apply_tc_on_edges(edges, delay=delay, jitter=jitter, loss=loss, max_queue_size=max_queue_size)
             return {"state": 1, "msg": "tc规则配置成功"}

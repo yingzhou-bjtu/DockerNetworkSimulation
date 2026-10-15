@@ -157,6 +157,8 @@ private deployments.
 The historical Chinese API notes are kept in `app/api_documentation_zh.md` and
 `app/mq测试用例.md`. New API documentation should be added under `docs/` and
 linked from this README.
+REST endpoints treat malformed or missing JSON as an empty payload so clients
+receive the handler's structured JSON error instead of Flask's HTML 400 page.
 
 ## Validation
 

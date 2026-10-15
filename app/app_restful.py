@@ -13,7 +13,7 @@ def create_app(network_handler):
 
     @app.route('/start', methods=['POST'])
     def start_simulation():
-        js = request.get_json()
+        js = request.get_json(silent=True)
         result = network_handler.start_simulation(js)
         return jsonify(result)
 
@@ -29,21 +29,21 @@ def create_app(network_handler):
 
     @app.route('/node/ipaddr', methods=['GET'])
     def get_node_ipaddr():
-        js = request.get_json()
+        js = request.get_json(silent=True)
         node_name = js.get('node_name') if js else None
         result = network_handler.get_node_ipaddr(node_name)
         return jsonify(result)
 
     @app.route('/node/iproute', methods=['GET'])
     def get_node_iproute():
-        js = request.get_json()
+        js = request.get_json(silent=True)
         node_name = js.get('node_name') if js else None
         result = network_handler.get_node_iproute(node_name)
         return jsonify(result)
 
     @app.route('/get-delay', methods=['GET'])
     def get_pair_delay():
-        js = request.get_json()
+        js = request.get_json(silent=True)
         src_node_name = js.get('src_node_name') if js else None
         dst_node_name = js.get('dst_node_name') if js else None
         result = network_handler.get_pair_delay_by_name(src_node_name, dst_node_name)
@@ -51,7 +51,7 @@ def create_app(network_handler):
 
     @app.route('/set_delay', methods=['POST'])
     def set_delay():
-        js = request.get_json()
+        js = request.get_json(silent=True)
         result = network_handler.set_tc_on_edges(js)
         return jsonify(result)
 
